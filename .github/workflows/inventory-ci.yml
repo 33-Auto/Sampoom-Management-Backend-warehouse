@@ -5,7 +5,11 @@ on:
     branches: [ "main", "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
-  workflow_dispatch: {}   # 버튼으로도 실행 가능
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Release version (e.g., 1.0.0)"
+        required: true
 
 permissions:
   contents: read
@@ -25,22 +29,36 @@ jobs:
 
       - run: chmod +x ./gradlew
 
-      # (옵션) CI 전용 설정파일이 필요하면 Secrets로 생성
+      # (옵션) CI 전용 설정파일 주입이 필요하면 주석 해제
       # - name: Create application-ci.yml
       #   run: |
       #     mkdir -p src/main/resources
       #     echo "${{ secrets.APP_CI_YML }}" > src/main/resources/application-ci.yml
 
+      - name: Normalize Dockerfile (strip BOM, CRLF→LF)
+        run: |
+          sed -i '1s/^\xEF\xBB\xBF//' Dockerfile || true
+          if command -v dos2unix >/dev/null 2>&1; then
+            dos2unix Dockerfile
+          else
+            perl -pi -e 's/\r\n/\n/g' Dockerfile
+          fi
+
       - name: Build inventory jar
         run: ./gradlew clean test bootJar -Dspring.profiles.active=ci
 
+      # ▶ 버전 태그 분기: 수동 실행이면 입력 버전, 그 외엔 SHA 사용
       - name: Set image tags
         id: vars
         run: |
           SHA=${GITHUB_SHA::7}
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VER="${{ github.event.inputs.release_version }}"
+            echo "TAG_VERSION=inventory-${VER}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG_VERSION=inventory-${SHA}" >> $GITHUB_OUTPUT
+          fi
           echo "IMAGE=hysungzzang/sampoom" >> $GITHUB_OUTPUT
-          echo "TAG_SHA=inventory-${SHA}"  >> $GITHUB_OUTPUT
-          echo "TAG_LATEST=inventory-latest" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -48,7 +66,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # buildx가 RST_STREAM 날릴 때가 있어요 → 아래 옵션들이 비교적 안정적
+      # buildx가 튀는 경우가 있어 안정 옵션 적용
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -64,8 +82,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          no-cache: true          # 초기엔 캐시끄기(문제줄이기). 안정화 후 제거 가능
-          provenance: false       # 일부 환경에서 GRPC 이슈 완화
+          no-cache: true
+          provenance: false
           tags: |
-            ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_SHA }}
-            ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_LATEST }}
+            ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_VERSION }}
