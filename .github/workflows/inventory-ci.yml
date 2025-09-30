@@ -31,7 +31,7 @@ jobs:
       #     echo "${{ secrets.APP_CI_YML }}" > inventory/src/main/resources/application-ci.yml
 
       - name: Build inventory jar
-        run: ./gradlew clean test :inventory:bootJar -Dspring.profiles.active=ci
+        run: ./gradlew clean test bootJar -Dspring.profiles.active=ci
 
       - name: Set image tags
         id: vars
