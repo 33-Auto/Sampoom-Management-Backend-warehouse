@@ -1,15 +1,10 @@
-name: Inventory CI (one repo / service tag)
+name: Inventory CI (use Gradle version)
 
 on:
   push:
     branches: [ "main", "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
-  workflow_dispatch:
-    inputs:
-      release_version:
-        description: "Release version (e.g., 1.0.0)"
-        required: true
 
 permissions:
   contents: read
@@ -29,12 +24,7 @@ jobs:
 
       - run: chmod +x ./gradlew
 
-      # (옵션) CI 전용 설정파일 주입이 필요하면 주석 해제
-      # - name: Create application-ci.yml
-      #   run: |
-      #     mkdir -p src/main/resources
-      #     echo "${{ secrets.APP_CI_YML }}" > src/main/resources/application-ci.yml
-
+      # (윈도우에서 커밋된 Dockerfile 문제 방지)
       - name: Normalize Dockerfile (strip BOM, CRLF→LF)
         run: |
           sed -i '1s/^\xEF\xBB\xBF//' Dockerfile || true
@@ -47,18 +37,18 @@ jobs:
       - name: Build inventory jar
         run: ./gradlew clean test bootJar -Dspring.profiles.active=ci
 
-      # ▶ 버전 태그 분기: 수동 실행이면 입력 버전, 그 외엔 SHA 사용
+      # Gradle의 version 값을 읽어옴 (예: 1.0.0 또는 1.0.0-SNAPSHOT)
+      - name: Read version from Gradle
+        id: ver
+        run: echo "VERSION=$(./gradlew -q properties | grep '^version:' | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
       - name: Set image tags
         id: vars
         run: |
-          SHA=${GITHUB_SHA::7}
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VER="${{ github.event.inputs.release_version }}"
-            echo "TAG_VERSION=inventory-${VER}" >> $GITHUB_OUTPUT
-          else
-            echo "TAG_VERSION=inventory-${SHA}" >> $GITHUB_OUTPUT
-          fi
-          echo "IMAGE=hysungzzang/sampoom" >> $GITHUB_OUTPUT
+          IMAGE="hysungzzang/sampoom"
+          VER="${{ steps.ver.outputs.VERSION }}"
+          echo "IMAGE=${IMAGE}" >> $GITHUB_OUTPUT
+          echo "TAG_VERSION=inventory-${VER}" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -66,7 +56,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # buildx가 튀는 경우가 있어 안정 옵션 적용
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
         with:
