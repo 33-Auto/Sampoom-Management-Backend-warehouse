@@ -1,0 +1,61 @@
+name: Inventory CI (one repo / service tag)
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: chmod +x ./gradlew
+
+      # (옵션) CI 전용 설정파일이 필요하면 주입
+      # - name: Create application-ci.yml
+      #   run: |
+      #     mkdir -p inventory/src/main/resources
+      #     echo "${{ secrets.APP_CI_YML }}" > inventory/src/main/resources/application-ci.yml
+
+      - name: Build inventory jar
+        run: ./gradlew clean test :inventory:bootJar -Dspring.profiles.active=ci
+
+      - name: Set image tags
+        id: vars
+        run: |
+          SHA=${GITHUB_SHA::7}
+          echo "IMAGE=hysungzzang/sampoom" >> $GITHUB_OUTPUT
+          echo "TAG_SHA=inventory-${SHA}"  >> $GITHUB_OUTPUT
+          echo "TAG_LATEST=inventory-latest" >> $GITHUB_OUTPUT
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build & Push (inventory)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          build-args: |
+            SERVICE=inventory
+            JAR_FILE=build/libs/*.jar
+          tags: |
+            ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_SHA }}
+            ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.TAG_LATEST }}
