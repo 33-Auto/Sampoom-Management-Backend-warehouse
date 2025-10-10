@@ -1,0 +1,10 @@
+.git
+.github
+.gradle
+.idea
+**/*.iml
+node_modules
+
+# 빌드 산출물 제외
+**/build/*
+!**/build/libs/*.jar

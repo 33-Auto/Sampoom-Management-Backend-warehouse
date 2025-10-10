@@ -9,8 +9,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PartResDto {
     private Long id;
+    private String category;
+    private String group;
     private String name;
     private String code;
     private Long quantity;
-    private String description;
+    private String status;
 }
