@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.part.entity;
+package com.sampoom.backend.api.branch.entity;
 
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -7,19 +7,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
 @Entity
-@Table(name = "part")
+@Table(name = "branch")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Part extends BaseTimeEntity {
+public class Branch extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String code;         // 부품 코드 (예: P-001)
-    private String name;         // 부품명
-    private String description;  // 설명
+    private String name;         // 지점명
 }
-
