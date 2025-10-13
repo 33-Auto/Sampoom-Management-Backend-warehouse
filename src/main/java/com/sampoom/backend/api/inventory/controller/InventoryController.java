@@ -19,6 +19,12 @@ import java.util.List;
 public class InventoryController {
     private final InventoryService inventoryService;
 
+    /**
+     * 창고에 등록된 분류(카테고리) 목록을 조회한다.
+     *
+     * @param warehouseId 조회할 창고의 식별자
+     * @return 요청한 창고의 분류 목록을 담은 ApiResponse(`List<CategoryResDto>`)
+     */
     @GetMapping("/{warehouseId}/category")
     public ResponseEntity<ApiResponse<List<CategoryResDto>>> getCategoriesByWarehouse(@PathVariable Long warehouseId) {
         List<CategoryResDto> categories = new ArrayList<>();
@@ -35,6 +41,13 @@ public class InventoryController {
         return ApiResponse.success(SuccessStatus.OK, categories);
     }
 
+    /**
+     * 지정한 카테고리 ID에 해당하는 그룹 목록을 반환한다.
+     *
+     * @param warehouseId 조회할 창고의 ID
+     * @param categoryId  조회할 카테고리의 ID (1에서 7 사이의 값으로 예상)
+     * @return ApiResponse에 래핑된 GroupResDto 목록과 SuccessStatus.OK 상태를 포함한 응답
+     */
     @GetMapping("/{warehouseId}/category/{categoryId}")
     public ResponseEntity<ApiResponse<List<GroupResDto>>> getGroupsByCategory(
             @PathVariable Long warehouseId,
@@ -48,6 +61,12 @@ public class InventoryController {
         return ApiResponse.success(SuccessStatus.OK, groups);
     }
 
+    /**
+     * 그룹 식별자에 해당하는 부품 목록을 조회한다.
+     *
+     * @param groupId 조회할 그룹의 식별자(배열 인덱스로 사용; 1 기반)
+     * @return ApiResponse로 래핑된 해당 그룹의 PartResDto 목록 — 각 항목은 id, category, group, name, code, quantity, status를 포함한다.
+     */
     @GetMapping("/{warehouseId}/group/{groupId}")
     public ResponseEntity<ApiResponse<List<PartResDto>>> getPartsByGroup(
             @PathVariable Long groupId

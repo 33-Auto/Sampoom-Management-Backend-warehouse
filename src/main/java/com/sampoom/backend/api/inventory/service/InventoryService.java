@@ -12,6 +12,12 @@ import java.util.List;
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
 
+    /**
+     * 주어진 지점 ID에 해당하는 재고 목록을 조회한다.
+     *
+     * @param branchId 조회할 지점의 ID
+     * @return 해당 지점에 속한 Inventory 객체의 목록
+     */
     public List<Inventory> getInventoriesByBranch(Long branchId) {
         return inventoryRepository.findByBranchId(branchId);
     }
