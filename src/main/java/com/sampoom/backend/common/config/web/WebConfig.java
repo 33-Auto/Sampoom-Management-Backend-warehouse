@@ -1,4 +1,4 @@
-package com.sampoom.backend.common.config.swagger;
+package com.sampoom.backend.common.config.web;
 
 
 import org.springframework.context.annotation.Configuration;
