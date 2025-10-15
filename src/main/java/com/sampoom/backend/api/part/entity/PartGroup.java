@@ -2,25 +2,22 @@ package com.sampoom.backend.api.part.entity;
 
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.Immutable;
 
 @Entity
-@Table(name = "part")
+@Table(name = "part_group")
 @Getter
 @NoArgsConstructor
 @Immutable
-public class Part extends BaseTimeEntity {
+public class PartGroup extends BaseTimeEntity {
     @Id
     private Long id;
 
     private String code;
     private String name;
-    private String status;
 
-    @Column(name = "group_id")
-    private Long groupId;
+    @Column(name = "category_id")
+    private Long categoryId;
 }
