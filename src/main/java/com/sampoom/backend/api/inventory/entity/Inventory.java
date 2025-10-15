@@ -27,6 +27,7 @@ public class Inventory extends BaseTimeEntity {
             foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // 🔥 FK 제약조건 생성 방지
     private Part part;
 
+    @Column(nullable = false)
     private Integer quantity;
     public void updateQuantity(int dq) {
         this.quantity += dq;
