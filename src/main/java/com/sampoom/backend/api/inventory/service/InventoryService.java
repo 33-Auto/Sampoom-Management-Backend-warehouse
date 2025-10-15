@@ -7,13 +7,9 @@ import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
-import com.sampoom.backend.common.response.ApiResponse;
-import com.sampoom.backend.common.response.SuccessStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,7 +18,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
-    private final EntityManager em;
     private final InventoryRepository inventoryRepository;
     private final CategoryRepository categoryRepository;
     private final PartGroupRepository partGroupRepository;
