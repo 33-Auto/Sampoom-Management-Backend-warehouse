@@ -10,7 +10,7 @@ import lombok.*;
 @Table(name = "inventory")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class Inventory extends BaseTimeEntity {
@@ -19,12 +19,17 @@ public class Inventory extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id")
+    @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "part_id")
+    @JoinColumn(name = "part_id", nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // 🔥 FK 제약조건 생성 방지
     private Part part;
 
-    private Integer quantity;  // 재고 수량
+    @Column(nullable = false)
+    private Integer quantity;
+    public void updateQuantity(int dq) {
+        this.quantity += dq;
+    }
 }

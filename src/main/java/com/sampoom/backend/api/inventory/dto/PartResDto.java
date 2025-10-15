@@ -13,6 +13,6 @@ public class PartResDto {
     private String group;
     private String name;
     private String code;
-    private Long quantity;
+    private Integer quantity;
     private String status;
 }
