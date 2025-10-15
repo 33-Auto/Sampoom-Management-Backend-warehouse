@@ -20,18 +20,7 @@ public class InventoryController {
 
     @GetMapping("/{warehouseId}/category")
     public ResponseEntity<ApiResponse<List<CategoryResDto>>> getCategoriesByWarehouse(@PathVariable Long warehouseId) {
-        List<CategoryResDto> categories = new ArrayList<>();
-        String[] categoryName = {"엔진", "트랜스미션", "샤시", "바디", "트림", "일렉트릭", "커넥터"};
-
-        for (int i = 1; i <= categoryName.length; ++i) {
-            categories.add(CategoryResDto.builder()
-                    .id((long) i)
-                    .name(categoryName[i-1])
-                    .build()
-            );
-        }
-
-        return ApiResponse.success(SuccessStatus.OK, categories);
+        return ApiResponse.success(SuccessStatus.OK, inventoryService.getCategoriesByWarehouse(warehouseId));
     }
 
     @GetMapping("/{warehouseId}/category/{categoryId}")
@@ -44,7 +33,7 @@ public class InventoryController {
 
         groups.add(GroupResDto.builder().id(1L).name(groupName[(int) (categoryId-1)]).build());
 
-        return ApiResponse.success(SuccessStatus.OK, groups);
+        return ApiResponse.success(SuccessStatus.OK, inventoryService.getGroupsByCategory(categoryId));
     }
 
     @GetMapping("/{warehouseId}/group/{groupId}")
@@ -63,10 +52,19 @@ public class InventoryController {
                 .group(groupName[(int) (groupId-1)])
                 .name(partName[(int) (groupId-1)])
                 .code(partCode[(int) (groupId-1)])
-                .quantity(230L)
+                .quantity(230)
                 .status("충분")
                 .build());
 
         return ApiResponse.success(SuccessStatus.OK, parts);
+    }
+
+    @GetMapping("/{warehouseId}")
+    public List<PartResDto> getParts(
+            @PathVariable Long warehouseId,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long groupId
+    ) {
+        return inventoryService.findParts(warehouseId, categoryId, groupId);
     }
 }
