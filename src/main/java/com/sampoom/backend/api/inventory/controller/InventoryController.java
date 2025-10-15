@@ -60,11 +60,11 @@ public class InventoryController {
     }
 
     @GetMapping("/{warehouseId}")
-    public List<PartResDto> getParts(
+    public ResponseEntity<ApiResponse<List<PartResDto>>> getParts(
             @PathVariable Long warehouseId,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long groupId
     ) {
-        return inventoryService.findParts(warehouseId, categoryId, groupId);
+        return ApiResponse.success(SuccessStatus.OK, inventoryService.findParts(warehouseId, categoryId, groupId));
     }
 }
