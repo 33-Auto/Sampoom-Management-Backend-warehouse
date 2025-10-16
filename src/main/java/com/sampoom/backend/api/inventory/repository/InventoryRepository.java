@@ -3,6 +3,7 @@ package com.sampoom.backend.api.inventory.repository;
 import com.sampoom.backend.api.inventory.dto.PartResDto;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,4 +25,12 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
             @Param("categoryId") Long categoryId,
             @Param("groupId") Long groupId
     );
+
+    @Modifying
+    @Query(value = """
+    INSERT INTO inventory (branch_id, part_id, quantity, created_at, updated_at)
+    SELECT :branchId, p.id, 0, NOW(), NOW()
+    FROM part p
+    """, nativeQuery = true)
+    void initializeInventory(@Param("branchId") Long branchId);
 }
