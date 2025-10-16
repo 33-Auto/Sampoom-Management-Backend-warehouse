@@ -2,7 +2,6 @@ package com.sampoom.backend.api.branch.controller;
 
 import com.sampoom.backend.api.branch.dto.BranchCreateReqDto;
 import com.sampoom.backend.api.branch.dto.BranchCreateResDto;
-import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.branch.service.BranchService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
@@ -21,6 +20,6 @@ public class BranchController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<BranchCreateResDto>> createBranch(@RequestBody BranchCreateReqDto branchCreateReqDto) {
-        return ApiResponse.success(SuccessStatus.OK, branchService.createBranch(branchCreateReqDto));
+        return ApiResponse.success(SuccessStatus.CREATED, branchService.createBranch(branchCreateReqDto));
     }
 }
