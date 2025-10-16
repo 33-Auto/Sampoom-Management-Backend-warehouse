@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 public class BranchCreateReqDto {
-    @NotBlank("지점명은 필수입니다.")
+    @NotBlank(message = "지점명은 필수입니다.")
     private String name;
 }
