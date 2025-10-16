@@ -29,8 +29,12 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Modifying
     @Query(value = """
     INSERT INTO inventory (branch_id, part_id, quantity, created_at, updated_at)
-    SELECT :branchId, p.id, 0, NOW(), NOW()
+    SELECT :branchId, p.id, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     FROM part p
+    WHERE NOT EXISTS (
+        SELECT 1 FROM inventory i
+        WHERE i.branch_id = :branchId AND i.part_id = p.id
+    )
     """, nativeQuery = true)
     void initializeInventory(@Param("branchId") Long branchId);
 }
