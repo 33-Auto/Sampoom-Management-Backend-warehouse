@@ -5,6 +5,7 @@ import com.sampoom.backend.api.branch.dto.BranchCreateResDto;
 import com.sampoom.backend.api.branch.service.BranchService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +20,7 @@ public class BranchController {
     private final BranchService branchService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BranchCreateResDto>> createBranch(@RequestBody BranchCreateReqDto branchCreateReqDto) {
+    public ResponseEntity<ApiResponse<BranchCreateResDto>> createBranch(@Valid @RequestBody BranchCreateReqDto branchCreateReqDto) {
         return ApiResponse.success(SuccessStatus.CREATED, branchService.createBranch(branchCreateReqDto));
     }
 }
