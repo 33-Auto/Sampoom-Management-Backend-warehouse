@@ -1,4 +1,4 @@
-name: Warehouse CI (use Gradle version)
+name: Warehouse CI (use Gradle)
 
 on:
   push:
