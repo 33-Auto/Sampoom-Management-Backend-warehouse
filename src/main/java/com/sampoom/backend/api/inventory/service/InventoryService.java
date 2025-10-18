@@ -14,6 +14,7 @@ import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -90,24 +91,28 @@ public class InventoryService {
             }
         }
 
-        StringBuilder sql = new StringBuilder("UPDATE inventory SET quantity = quantity + CASE part_id ");
-
-        // CASE WHEN 절 생성
-        for (UpdatePartReqDto updatePartReqDto : updatePartReqDtos) {
-            sql.append("WHEN ").append(updatePartReqDto.getId())
-                    .append(" THEN ").append(updatePartReqDto.getDelta()).append(" ");
+        StringBuilder values = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+        int idx = 0;
+        for (UpdatePartReqDto dto : updatePartReqDtos) {
+            if (idx > 0) values.append(", ");
+            String pid = "pid" + idx;
+            String delta = "delta" + idx;
+            values.append("(:").append(pid).append(", :").append(delta).append(")");
+            params.put(pid, dto.getId());
+            params.put(delta, dto.getDelta());
+            idx++;
         }
 
-        // WHERE 절: branch_id + 해당 부품 ID만
-        sql.append("END WHERE branch_id = ").append(warehouseId)
-                .append(" AND part_id IN (")
-                .append(updatePartReqDtos.stream()
-                        .map(a -> a.getId().toString())
-                        .collect(Collectors.joining(",")))
-                .append(")");
+        String sql = "UPDATE inventory i SET quantity = i.quantity + t.delta " +
+                "FROM (VALUES " + values + ") AS t(part_id, delta) " +
+                "WHERE i.part_id = t.part_id AND i.branch_id = :branchId";
 
-        // 실행
-        entityManager.createNativeQuery(sql.toString()).executeUpdate();
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("branchId", warehouseId);
+        params.forEach(query::setParameter);
+
+        query.executeUpdate();
     }
 
 }
