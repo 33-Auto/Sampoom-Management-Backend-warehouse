@@ -72,7 +72,7 @@ public class InventoryService {
         List<Long> partIds = updatePartReqDtos.stream()
                 .map(UpdatePartReqDto::getId)
                 .toList();
-        List<Inventory> inventories = inventoryRepository.findByBranchIdAndPartIdIn(warehouseId, partIds);
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
 
         Map<Long, Inventory> invMap = inventories.stream()
                 .collect(Collectors.toMap(i -> i.getPart().getId(), i -> i));
