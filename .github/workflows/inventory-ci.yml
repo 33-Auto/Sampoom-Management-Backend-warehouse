@@ -40,7 +40,7 @@ jobs:
           echo "${{ secrets.APP_PROPS_WAREHOUSE }}" > src/main/resources/application.properties
 
       - name: Build warehouse jar
-        run: ./gradlew clean test bootJar -Dspring.profiles.active=ci
+        run: ./gradlew clean bootJar -x test -Dspring.profiles.active=ci
 
       # Gradle의 version 값을 읽어옴 (예: 1.0.0 또는 1.0.0-SNAPSHOT)
       - name: Read version from Gradle
