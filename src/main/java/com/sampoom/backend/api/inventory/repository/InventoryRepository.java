@@ -41,7 +41,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     void initializeInventory(@Param("branchId") Long branchId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<Inventory> findByBranchIdAndPartIdIn(Long branchId, List<Long> partIds);
+    List<Inventory> findByBranch_IdAndPart_IdIn(Long branchId, List<Long> partIds);
 
-    Optional<Inventory> findByBranchIdAndPartId(Long branchId, Long partId);
+    Optional<Inventory> findByBranch_IdAndPart_Id(Long branchId, Long partId);
 }
