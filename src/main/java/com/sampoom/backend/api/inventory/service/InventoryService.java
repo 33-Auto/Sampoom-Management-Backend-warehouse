@@ -18,9 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,6 +58,14 @@ public class InventoryService {
     public void updateParts(Long warehouseId, List<UpdatePartReqDto> updatePartReqDtos) {
         if (updatePartReqDtos == null || updatePartReqDtos.isEmpty()) {
             throw new BadRequestException(ErrorStatus.NO_UPDATE_PARTS_LIST.getMessage());
+        }
+
+        // 중복 ID 체크
+        Set<Long> uniqueIds = new HashSet<>();
+        for (UpdatePartReqDto dto : updatePartReqDtos) {
+            if (!uniqueIds.add(dto.getId())) {
+                throw new BadRequestException(ErrorStatus.DUPLICATED_PART.getMessage() + " partId: " + dto.getId());
+            }
         }
 
         // 현재 수량 조회

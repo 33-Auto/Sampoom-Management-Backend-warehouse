@@ -17,6 +17,7 @@ public enum ErrorStatus {
 
     NO_UPDATE_PARTS_LIST(HttpStatus.BAD_REQUEST, "업데이트 할 부품 리스트가 없습니다."),
     INVALID_PART_QUANTITY(HttpStatus.BAD_REQUEST, "부품의 재고 수량은 0 이상이어야 합니다."),
+    DUPLICATED_PART(HttpStatus.BAD_REQUEST, "중복된 부품 아이디가 있습니다"),
 
 
     // 401 UNAUTHORIZED
