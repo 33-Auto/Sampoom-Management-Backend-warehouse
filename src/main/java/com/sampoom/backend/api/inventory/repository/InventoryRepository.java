@@ -37,4 +37,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     )
     """, nativeQuery = true)
     void initializeInventory(@Param("branchId") Long branchId);
+
+    List<Inventory> findByBranchIdAndPartIdIn(Long branchId, List<Long> partIds);
+
+    Optional<Inventory> findByBranchIdAndPartId(Long branchId, Long partId);
 }
