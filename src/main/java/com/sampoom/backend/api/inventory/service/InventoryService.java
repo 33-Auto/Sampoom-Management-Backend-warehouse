@@ -80,7 +80,7 @@ public class InventoryService {
             }
 
             if (inv.getQuantity() + dto.getDelta() < 0) {
-                throw new BadRequestException(ErrorStatus.INVALID_PART_QUANTITY.getMessage() + "partId: " + dto.getId());
+                throw new BadRequestException(ErrorStatus.INVALID_PART_QUANTITY.getMessage() + " partId: " + dto.getId());
             }
         }
 
