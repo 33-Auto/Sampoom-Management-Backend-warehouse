@@ -3,6 +3,7 @@ package com.sampoom.backend.api.inventory.controller;
 import com.sampoom.backend.api.inventory.dto.CategoryResDto;
 import com.sampoom.backend.api.inventory.dto.GroupResDto;
 import com.sampoom.backend.api.inventory.dto.PartResDto;
+import com.sampoom.backend.api.inventory.dto.UpdatePartReqDto;
 import com.sampoom.backend.api.inventory.service.InventoryService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
@@ -66,5 +67,11 @@ public class InventoryController {
             @RequestParam(required = false) Long groupId
     ) {
         return ApiResponse.success(SuccessStatus.OK, inventoryService.findParts(warehouseId, categoryId, groupId));
+    }
+
+    @PatchMapping("/{warehouseId}")
+    public ResponseEntity<ApiResponse<Void>> updateParts(@PathVariable Long warehouseId, @RequestBody List<UpdatePartReqDto> parts) {
+        inventoryService.updateParts(warehouseId, parts);
+        return ApiResponse.success_only(SuccessStatus.OK);
     }
 }

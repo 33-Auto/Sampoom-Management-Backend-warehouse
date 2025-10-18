@@ -15,6 +15,10 @@ public enum ErrorStatus {
     ALREADY_REGISTER_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 가입된 이메일 입니다."),
     ALREADY_EXIST_BRANCH_NAME(HttpStatus.BAD_REQUEST, "이미 존재하는 지점명입니다"),
 
+    NO_UPDATE_PARTS_LIST(HttpStatus.BAD_REQUEST, "업데이트 할 부품 리스트가 없습니다."),
+    INVALID_PART_QUANTITY(HttpStatus.BAD_REQUEST, "부품의 재고 수량은 0 이상이어야 합니다."),
+    DUPLICATED_PART(HttpStatus.BAD_REQUEST, "중복된 부품 아이디가 있습니다"),
+
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
@@ -24,6 +28,7 @@ public enum ErrorStatus {
 
     // 404 NOT_FOUND
     NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
+    PART_NOT_FOUND(HttpStatus.NOT_FOUND, "창고에 존재하지 않는 부품입니다."),
 
 
 
