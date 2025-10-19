@@ -44,4 +44,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     List<Inventory> findByBranch_IdAndPart_IdIn(Long branchId, List<Long> partIds);
 
     Optional<Inventory> findByBranch_IdAndPart_Id(Long branchId, Long partId);
+
+    @Query("SELECT i.quantity FROM Inventory i WHERE i.branch.id = :warehouseId AND i.part.code = :code")
+    Integer findStockByWarehouseIdAndCode(@Param("warehouseId") Long warehouseId,
+                                          @Param("code") String code);
 }

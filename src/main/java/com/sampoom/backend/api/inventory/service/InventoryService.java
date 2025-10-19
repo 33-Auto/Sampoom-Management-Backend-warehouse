@@ -6,6 +6,8 @@ import com.sampoom.backend.api.inventory.dto.PartResDto;
 import com.sampoom.backend.api.inventory.dto.UpdatePartReqDto;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
+import com.sampoom.backend.api.order.dto.ItemDto;
+import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
@@ -113,6 +115,19 @@ public class InventoryService {
         params.forEach(query::setParameter);
 
         query.executeUpdate();
+    }
+
+    public boolean isStockAvailable(OrderReqDto orderReqDto) {
+        for (ItemDto item : orderReqDto.getItems()) {
+            Integer stock = inventoryRepository.findStockByWarehouseIdAndCode(
+                    1L, item.getCode()
+            );
+
+            if (stock == null || stock < item.getQuantity()) {
+                return false; // 재고 부족
+            }
+        }
+        return true;
     }
 
 }
