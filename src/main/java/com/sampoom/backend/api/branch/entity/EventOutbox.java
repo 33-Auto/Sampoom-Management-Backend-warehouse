@@ -24,7 +24,7 @@ public class EventOutbox extends BaseTimeEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
-    private BranchEvent payload; // JSON 문자열
+    private BranchEvent payload; // BranchEvent 객체 (DB에 JSONB로 저장)
 
     @Column(nullable = false)
     private EventStatus status = EventStatus.PENDING;
