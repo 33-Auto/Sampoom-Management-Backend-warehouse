@@ -20,7 +20,7 @@ import java.util.List;
 public class EventOutboxPublisher {
     private final EventOutboxRepository eventOutboxRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Scheduled(fixedDelay = 2000)
     @Transactional
