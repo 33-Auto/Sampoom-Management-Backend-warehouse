@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.branch.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sampoom.backend.api.branch.dto.BranchCreateReqDto;
 import com.sampoom.backend.api.branch.dto.BranchCreateResDto;
 import com.sampoom.backend.api.branch.service.BranchService;
@@ -20,7 +21,7 @@ public class BranchController {
     private final BranchService branchService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BranchCreateResDto>> createBranch(@Valid @RequestBody BranchCreateReqDto branchCreateReqDto) {
+    public ResponseEntity<ApiResponse<BranchCreateResDto>> createBranch(@Valid @RequestBody BranchCreateReqDto branchCreateReqDto) throws JsonProcessingException {
         return ApiResponse.success(SuccessStatus.CREATED, branchService.createBranch(branchCreateReqDto));
     }
 }
