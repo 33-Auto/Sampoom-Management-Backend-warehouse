@@ -27,6 +27,7 @@ public class EventOutbox extends BaseTimeEntity {
     private BranchEvent payload; // BranchEvent 객체 (DB에 JSONB로 저장)
 
     @Column(nullable = false)
+    @Builder.Default
     private EventStatus status = EventStatus.PENDING;
 
 

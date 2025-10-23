@@ -41,7 +41,6 @@ public class BranchService {
                         .id(newBranch.getId())
                         .name(newBranch.getName())
                         .build())
-                .status(EventStatus.PENDING)
                 .build();
         eventOutboxRepository.save(eventOutbox);
 
