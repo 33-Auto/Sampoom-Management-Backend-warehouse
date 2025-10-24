@@ -4,9 +4,6 @@ import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-
 @Entity
 @Table(name = "branch")
 @Getter
