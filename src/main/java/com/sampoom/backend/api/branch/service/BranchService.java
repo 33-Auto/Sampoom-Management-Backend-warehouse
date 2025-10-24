@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 public class BranchService {
     private final BranchRepository branchRepository;
     private final InventoryRepository inventoryRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final EventOutboxRepository eventOutboxRepository;
 
     @Transactional
