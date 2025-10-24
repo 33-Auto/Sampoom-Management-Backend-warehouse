@@ -19,4 +19,5 @@ public class Branch extends BaseTimeEntity {
     private Long id;
 
     private String name;         // 지점명
+    private String address;      // 주소
 }
