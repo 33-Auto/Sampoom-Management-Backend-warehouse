@@ -25,7 +25,7 @@ public class BranchService {
     private final EventOutboxRepository eventOutboxRepository;
 
     @Transactional
-    public BranchCreateResDto createBranch(BranchCreateReqDto branchCreateReqDto) throws JsonProcessingException {
+    public BranchCreateResDto createBranch(BranchCreateReqDto branchCreateReqDto) {
         if (branchRepository.existsByName(branchCreateReqDto.getName())) {
             throw new BadRequestException(ErrorStatus.ALREADY_EXIST_BRANCH_NAME.getMessage());
         }
