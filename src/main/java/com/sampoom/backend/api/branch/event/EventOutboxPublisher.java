@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.branch.event;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.entity.EventOutbox;
 import com.sampoom.backend.api.branch.entity.EventStatus;
@@ -23,18 +22,29 @@ public class EventOutboxPublisher {
     private final ObjectMapper objectMapper;
 
     @Scheduled(fixedDelay = 2000)
-    @Transactional
     public void publishPendingEvents() {
         List<EventOutbox> pendingEvents = eventOutboxRepository.findByStatus(EventStatus.PENDING);
+        List<EventOutbox> retryEvents = eventOutboxRepository.findByStatus(EventStatus.FAILED);
+        pendingEvents.addAll(retryEvents);
 
         for (EventOutbox event : pendingEvents) {
             try {
-                kafkaTemplate.send(event.getTopic(), objectMapper.writeValueAsString(event.getPayload()));
-                event.setStatus(EventStatus.PUBLISHED);
-                log.info("✅ Sent outbox event: {}", event.getId());
+                kafkaTemplate.send(event.getTopic(), objectMapper.writeValueAsString(event.getPayload()))
+                        .thenAccept(result -> {
+                            event.setStatus(EventStatus.PUBLISHED);
+                            eventOutboxRepository.save(event);
+                            log.info("✅ Sent outbox event: {}", event.getId());
+                        })
+                        .exceptionally(ex -> {
+                            event.setStatus(EventStatus.FAILED);
+                            eventOutboxRepository.save(event);
+                            log.error("❌ Failed to send outbox event: {}", event.getId(), ex);
+                            return null;
+                        });
             } catch (Exception e) {
                 event.setStatus(EventStatus.FAILED);
-                log.error("❌ Failed to send outbox event: {}", event.getId(), e);
+                eventOutboxRepository.save(event);
+                log.error("❌ Failed to serialize event: {}", event.getId(), e);
             }
         }
     }
