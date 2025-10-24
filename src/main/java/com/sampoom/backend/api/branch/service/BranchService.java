@@ -30,7 +30,10 @@ public class BranchService {
             throw new BadRequestException(ErrorStatus.ALREADY_EXIST_BRANCH_NAME.getMessage());
         }
 
-        Branch newBranch = Branch.builder().name(branchCreateReqDto.getName()).build();
+        Branch newBranch = Branch.builder()
+                .name(branchCreateReqDto.getName())
+                .address(branchCreateReqDto.getAddress())
+                .build();
         branchRepository.save(newBranch);
         inventoryRepository.initializeInventory(newBranch.getId());
 
@@ -39,6 +42,8 @@ public class BranchService {
                 .payload(BranchEvent.builder()
                         .id(newBranch.getId())
                         .name(newBranch.getName())
+                        .address(newBranch.getAddress())
+                        .status(newBranch.getStatus())
                         .build())
                 .build();
         eventOutboxRepository.save(eventOutbox);
@@ -46,6 +51,8 @@ public class BranchService {
         return BranchCreateResDto.builder()
                 .id(newBranch.getId())
                 .name(newBranch.getName())
+                .address(newBranch.getAddress())
+                .status(newBranch.getStatus())
                 .build();
     }
 }
