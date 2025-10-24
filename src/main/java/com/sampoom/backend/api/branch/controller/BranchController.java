@@ -21,7 +21,7 @@ public class BranchController {
     private final BranchService branchService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BranchCreateResDto>> createBranch(@Valid @RequestBody BranchCreateReqDto branchCreateReqDto) throws JsonProcessingException {
+    public ResponseEntity<ApiResponse<BranchCreateResDto>> createBranch(@Valid @RequestBody BranchCreateReqDto branchCreateReqDto) {
         return ApiResponse.success(SuccessStatus.CREATED, branchService.createBranch(branchCreateReqDto));
     }
 }
