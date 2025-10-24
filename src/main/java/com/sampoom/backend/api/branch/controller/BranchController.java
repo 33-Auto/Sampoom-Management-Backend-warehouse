@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.branch.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sampoom.backend.api.branch.dto.BranchCreateReqDto;
 import com.sampoom.backend.api.branch.dto.BranchCreateResDto;
 import com.sampoom.backend.api.branch.service.BranchService;
