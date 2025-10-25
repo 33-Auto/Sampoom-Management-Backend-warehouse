@@ -29,6 +29,4 @@ public class EventOutbox extends BaseTimeEntity {
     @Column(nullable = false)
     @Builder.Default
     private EventStatus status = EventStatus.PENDING;
-
-
 }
