@@ -1,12 +1,9 @@
 package com.sampoom.backend.api.branch.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.dto.BranchCreateReqDto;
 import com.sampoom.backend.api.branch.dto.BranchCreateResDto;
 import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.branch.entity.EventOutbox;
-import com.sampoom.backend.api.branch.entity.EventStatus;
 import com.sampoom.backend.api.branch.event.BranchEvent;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.branch.repository.EventOutboxRepository;
@@ -16,6 +13,8 @@ import com.sampoom.backend.common.response.ErrorStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class BranchService {
                 .name(branchCreateReqDto.getName())
                 .address(branchCreateReqDto.getAddress())
                 .build();
-        branchRepository.save(newBranch);
+        branchRepository.saveAndFlush(newBranch);
         inventoryRepository.initializeInventory(newBranch.getId());
 
         EventOutbox eventOutbox = EventOutbox.builder()
@@ -44,6 +43,8 @@ public class BranchService {
                         .name(newBranch.getName())
                         .address(newBranch.getAddress())
                         .status(newBranch.getStatus())
+                        .version(newBranch.getVersion())
+                        .sourceUpdatedAt(newBranch.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
                         .build())
                 .build();
         eventOutboxRepository.save(eventOutbox);
