@@ -4,9 +4,6 @@ import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-
 @Entity
 @Table(name = "branch")
 @Getter
@@ -18,5 +15,17 @@ public class Branch extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String name;         // 지점명
+
+    @Column(unique = true, nullable = false)
+    private String address;      // 주소
+
+    @Column(nullable = false)
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private BranchStatus status = BranchStatus.ACTIVE;
+
+    @Version
+    private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
 }
