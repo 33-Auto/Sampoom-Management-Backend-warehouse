@@ -55,8 +55,9 @@ public class InventoryController {
                 .name(partName[(int) (groupId-1)])
                 .code(partCode[(int) (groupId-1)])
                 .quantity(230)
-                .rop("60 EA")
-                .partValue("38,250,000")
+                .rop(60)
+                .unit("EA")
+                .partValue(38250000)
                 .status("충분")
                 .build());
 

@@ -14,8 +14,9 @@ public class PartResDto {
     private String name;
     private String code;
     private Integer quantity;
-    private String rop;
-    private String partValue;
+    private Integer rop;
+    private String unit;
+    private Integer partValue;
     private String status;
 
     PartResDto(Long id, String category, String group, String name, String code, Integer quantity, String status) {
