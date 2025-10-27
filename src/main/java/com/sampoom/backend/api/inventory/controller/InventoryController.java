@@ -39,6 +39,7 @@ public class InventoryController {
 
     @GetMapping("/{warehouseId}/group/{groupId}")
     public ResponseEntity<ApiResponse<List<PartResDto>>> getPartsByGroup(
+            @PathVariable Long warehouseId,
             @PathVariable Long groupId
     ) {
         List<PartResDto> parts = new ArrayList<>();
@@ -54,6 +55,8 @@ public class InventoryController {
                 .name(partName[(int) (groupId-1)])
                 .code(partCode[(int) (groupId-1)])
                 .quantity(230)
+                .rop("60 EA")
+                .partValue("38,250,000")
                 .status("충분")
                 .build());
 
