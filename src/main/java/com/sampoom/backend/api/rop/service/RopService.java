@@ -2,6 +2,8 @@ package com.sampoom.backend.api.rop.service;
 
 import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
+import com.sampoom.backend.api.inventory.entity.Inventory;
+import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.api.rop.dto.RopItem;
@@ -26,26 +28,24 @@ public class RopService {
     private final BranchRepository branchRepository;
     private final RopRepository ropRepository;
     private final PartRepository partRepository;
+    private final InventoryRepository inventoryRepository;
 
     public void createRop(Long warehouseId) {
-        List<Part> parts = partRepository.findAll();
-        Branch branch = branchRepository.findById(warehouseId).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.BRANCH_NOT_FOUND.getMessage())
-        );
-
-        for (Part part : parts) {
-            Rop rop = Rop.builder()
-                    .branch(branch)
-                    .part(part)
-                    .rop(100)
-                    .build();
-            ropRepository.save(rop);
-        }
+        List<Inventory> inventories = inventoryRepository.findWithPartByBranchId(warehouseId);
+        List<Rop> rops = inventories.stream()
+                .map(i -> {
+                    int ropValue = i.getAverageDaily() * i.getLeadTime() + i.getPart().getSafetyStock();
+                    return Rop.builder()
+                            .inventory(i)
+                            .rop(ropValue)
+                            .build();
+                }).toList();
+        ropRepository.saveAll(rops);
     }
 
     @Transactional(readOnly = true)
     public RopResDto getAllRops( Long branchId) {
-        List<Rop> rops = ropRepository.findByBranchId(branchId);
+        List<Rop> rops = ropRepository.findByInventory_Branch_Id(branchId);
         List<RopItem> ropItems = rops.stream().map(
                 r -> RopItem.builder()
                         .ropId(r.getId())

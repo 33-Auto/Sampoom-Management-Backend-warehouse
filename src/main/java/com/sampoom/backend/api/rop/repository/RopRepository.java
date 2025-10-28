@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface RopRepository extends JpaRepository<Rop, Long> {
-    List<Rop> findByBranchId(Long BranchId);
+    List<Rop> findByInventory_Branch_Id(Long branchId);
 }

@@ -20,6 +20,7 @@ public class Part extends BaseTimeEntity {
     private String name;
     private String status;
     private String unit;
+    private Integer safetyStock;
 
     @Column(name = "group_id")
     private Long groupId;

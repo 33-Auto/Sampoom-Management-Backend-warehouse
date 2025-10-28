@@ -32,4 +32,10 @@ public class Inventory extends BaseTimeEntity {
     public void updateQuantity(int dq) {
         this.quantity += dq;
     }
+
+    @Column(name = "average_daily")
+    private Integer averageDaily;
+
+    @Column(name = "lead_time")
+    private Integer leadTime;
 }
