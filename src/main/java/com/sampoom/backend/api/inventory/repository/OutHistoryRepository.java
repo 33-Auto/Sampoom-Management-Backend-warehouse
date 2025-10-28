@@ -1,0 +1,20 @@
+package com.sampoom.backend.api.inventory.repository;
+
+
+import com.sampoom.backend.api.inventory.entity.OutHistory;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
+
+public interface OutHistoryRepository extends JpaRepository<OutHistory, Long> {
+    @Query("""
+        SELECT COALESCE(SUM(h.usedQuantity), 0)
+        FROM OutHistory h
+        WHERE h.inventory.id = :inventoryId
+          AND h.createdAt >= :startDate
+    """)
+    Integer findTotalUsedLastWeek(@Param("inventoryId") Long inventoryId,
+                                  @Param("startDate") LocalDateTime startDate);
+}
