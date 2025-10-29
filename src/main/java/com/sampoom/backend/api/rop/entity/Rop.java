@@ -1,8 +1,6 @@
 package com.sampoom.backend.api.rop.entity;
 
-import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.inventory.entity.Inventory;
-import com.sampoom.backend.api.part.entity.Part;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,4 +20,6 @@ public class Rop {
     private Inventory inventory;
 
     private Integer rop;
+    private Status autoOrderStatus;
+    private Status autoCalStatus;
 }
