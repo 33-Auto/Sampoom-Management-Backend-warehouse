@@ -90,7 +90,7 @@ public class RopService {
         inventoryRepository.save(inventory);
 
         rop.setAutoCalStatus(updateRopReqDto.getAutoCalStatus());
-        rop.setAutoCalStatus(updateRopReqDto.getAutoCalStatus());
+        rop.setAutoOrderStatus(updateRopReqDto.getAutoOrderStatus());
         rop.setRop(updateRopReqDto.getLeadTime() * updateRopReqDto.getAverageDaily() + inventory.getPart().getSafetyStock());
         ropRepository.save(rop);
     }
