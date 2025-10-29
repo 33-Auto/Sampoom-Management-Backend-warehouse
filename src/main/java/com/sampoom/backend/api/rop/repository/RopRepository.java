@@ -31,6 +31,7 @@ public interface RopRepository extends JpaRepository<Rop, Long> {
         JOIN FETCH i.branch b
         WHERE b.id = :inventoryBranchId
           AND r.autoCalStatus = :autoCalStatus
+          AND r.isDeleted = false
     """)
     List<Rop> findWithInventoryByInventory_Branch_IdAndAutoCalStatus(Long inventoryBranchId, Status autoCalStatus);
 }
