@@ -6,6 +6,7 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.inventory.repository.OutHistoryRepository;
 import com.sampoom.backend.api.rop.entity.Rop;
+import com.sampoom.backend.api.rop.entity.Status;
 import com.sampoom.backend.api.rop.repository.RopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,26 +32,20 @@ public class OutHistoryService {
         List<Branch> branches = branchRepository.findAll();
 
         for (Branch branch : branches) {
-            List<Inventory> inventories = inventoryRepository.findWithPartByBranchId(branch.getId());
+            List<Rop> rops = ropRepository.findWithInventoryByInventory_Branch_IdAndAutoCalStatus(branch.getId(), Status.ACTIVE);
 
-            for (Inventory inventory : inventories) {
+            for (Rop rop : rops) {
+                Inventory inventory = rop.getInventory();
                 Integer totalUsed = outHistoryRepository.findTotalUsedLastWeek(inventory.getId(), oneWeekAgo);
-                Integer averageDaily = totalUsed / 7;  // 하루 평균 소비량
-                inventory.setAverageDaily(averageDaily);
-
-                // ROP 재계산 = 평균일일소비량 × 리드타임 + 안전재고
+                Integer averageDaily = totalUsed / 7;
                 Integer ropValue = averageDaily * inventory.getLeadTime() + inventory.getPart().getSafetyStock();
 
-                // 기존 rop 엔티티 찾아서 업데이트
-                Rop rop = ropRepository.findByInventory_Id(inventory.getId())
-                        .orElse(Rop.builder().inventory(inventory).build());
+                inventory.setAverageDaily(averageDaily);
+                inventoryRepository.save(inventory);
+
                 rop.setRop(ropValue);
                 ropRepository.save(rop);
             }
-
         }
-
-
     }
-
 }
