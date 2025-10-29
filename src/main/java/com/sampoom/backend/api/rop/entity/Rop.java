@@ -31,4 +31,7 @@ public class Rop {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Status autoCalStatus = Status.INACTIVE;
+
+    @Builder.Default
+    private Boolean isDeleted = false;
 }

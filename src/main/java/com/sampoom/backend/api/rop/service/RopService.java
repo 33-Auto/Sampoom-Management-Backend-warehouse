@@ -1,10 +1,8 @@
 package com.sampoom.backend.api.rop.service;
 
-import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
-import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.api.rop.dto.RopItem;
 import com.sampoom.backend.api.rop.dto.RopReqDto;
@@ -14,15 +12,11 @@ import com.sampoom.backend.api.rop.entity.Rop;
 import com.sampoom.backend.api.rop.repository.RopRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +26,7 @@ public class RopService {
     private final PartRepository partRepository;
     private final InventoryRepository inventoryRepository;
 
+    @Transactional
     public void createRop(Long warehouseId) {
         List<Inventory> inventories = inventoryRepository.findWithPartByBranchId(warehouseId);
         List<Rop> rops = inventories.stream()
@@ -45,6 +40,7 @@ public class RopService {
         ropRepository.saveAll(rops);
     }
 
+    @Transactional
     public void createSingleRop(RopReqDto ropReqDto) {
         Inventory inventory = inventoryRepository.findByBranch_IdAndPart_Code(ropReqDto.getWarehouseId(), ropReqDto.getPartCode())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
@@ -79,20 +75,28 @@ public class RopService {
 
     @Transactional
     public void updateRop(UpdateRopReqDto updateRopReqDto) {
-        List<Rop> updateList = updateRopReqDto.getRopItems().stream().map(
-                ri -> {
-                    try {
-                        Rop rop = ropRepository.getReferenceById(ri.getRopId());
-                        rop.setRop(ri.getRop());
-                        return rop;
-                    } catch (EntityNotFoundException e) {
-                        throw new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage());
-                    }
-                }
+        Rop rop = ropRepository.findWithInventoryById(updateRopReqDto.getRopId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage())
+        );
+        Inventory inventory = rop.getInventory();
 
-        ).toList();
+        inventory.setLeadTime(updateRopReqDto.getLeadTime());
+        inventory.setAverageDaily(updateRopReqDto.getAverageDaily());
+        inventory.setMaxStock(updateRopReqDto.getMaxStock());
+        inventoryRepository.save(inventory);
 
-        ropRepository.saveAll(updateList);
+        rop.setAutoCalStatus(updateRopReqDto.getAutoCalStatus());
+        rop.setAutoCalStatus(updateRopReqDto.getAutoCalStatus());
+        rop.setRop(updateRopReqDto.getLeadTime() * updateRopReqDto.getAverageDaily() + inventory.getPart().getSafetyStock());
+        ropRepository.save(rop);
     }
 
+    @Transactional
+    public void deleteRop(Long ropId) {
+        Rop rop = ropRepository.findById(ropId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage())
+        );
+        rop.setIsDeleted(true);
+        ropRepository.save(rop);
+    }
 }

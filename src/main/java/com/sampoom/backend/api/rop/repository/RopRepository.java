@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface RopRepository extends JpaRepository<Rop, Long> {
     List<Rop> findByInventory_Branch_Id(Long branchId);
     Optional<Rop> findByInventory_Id(Long inventoryId);
+    Optional<Rop> findWithInventoryById(Long id);
 }

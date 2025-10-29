@@ -23,7 +23,7 @@ public class RopController {
         return ApiResponse.success_only(SuccessStatus.CREATED);
     }
 
-    @PostMapping("create/single")
+    @PostMapping("/create")
     public ResponseEntity<ApiResponse<Void>> createSingleRop(@RequestBody RopReqDto ropReqDto) {
         ropService.createSingleRop(ropReqDto);
         return ApiResponse.success_only(SuccessStatus.CREATED);
@@ -37,6 +37,12 @@ public class RopController {
     @PatchMapping
     public ResponseEntity<ApiResponse<Void>> updateRop(UpdateRopReqDto updateRopReqDto) {
         ropService.updateRop(updateRopReqDto);
+        return ApiResponse.success_only(SuccessStatus.OK);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteRop(@PathVariable Long ropId) {
+        ropService.deleteRop(ropId);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 }

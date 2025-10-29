@@ -31,7 +31,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Modifying(clearAutomatically = true)
     @Query(value = """
     INSERT INTO inventory (branch_id, part_id, quantity, average_daily, lead_time, max_stock, created_at, updated_at)
-    SELECT :branchId, p.id, p.safety_stock, p.safety_stock, 5, 500, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    SELECT :branchId, p.id, p.safety_stock*2, p.safety_stock, 5, p.safety_stock*5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     FROM part p
     WHERE NOT EXISTS (
         SELECT 1 FROM inventory i
