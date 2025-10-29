@@ -63,8 +63,8 @@ public class RopService {
     }
 
     @Transactional(readOnly = true)
-    public RopResDto getAllRops( Long branchId) {
-        List<Rop> rops = ropRepository.findByInventory_Branch_Id(branchId);
+    public RopResDto getAllRops(Long branchId) {
+        List<Rop> rops = ropRepository.findByInventory_Branch_IdAndIsDeletedFalse(branchId);
         List<RopItem> ropItems = rops.stream().map(
                 r -> RopItem.builder()
                         .ropId(r.getId())
