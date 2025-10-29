@@ -15,6 +15,6 @@ public interface OutHistoryRepository extends JpaRepository<OutHistory, Long> {
         WHERE h.inventory.id = :inventoryId
           AND h.createdAt >= :startDate
     """)
-    Integer findTotalUsedLastWeek(@Param("inventoryId") Long inventoryId,
+    Long findTotalUsedLastWeek(@Param("inventoryId") Long inventoryId,
                                   @Param("startDate") LocalDateTime startDate);
 }

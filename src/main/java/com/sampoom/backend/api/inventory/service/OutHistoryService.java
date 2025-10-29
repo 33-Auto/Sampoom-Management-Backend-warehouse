@@ -36,8 +36,8 @@ public class OutHistoryService {
 
             for (Rop rop : rops) {
                 Inventory inventory = rop.getInventory();
-                Integer totalUsed = outHistoryRepository.findTotalUsedLastWeek(inventory.getId(), oneWeekAgo);
-                Integer averageDaily = totalUsed / 7;
+                Long totalUsed = outHistoryRepository.findTotalUsedLastWeek(inventory.getId(), oneWeekAgo);
+                Integer averageDaily = Math.toIntExact(totalUsed / 7);
                 Integer ropValue = averageDaily * inventory.getLeadTime() + inventory.getPart().getSafetyStock();
 
                 inventory.setAverageDaily(averageDaily);
