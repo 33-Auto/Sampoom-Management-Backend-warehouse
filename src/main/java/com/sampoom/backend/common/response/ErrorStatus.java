@@ -33,7 +33,7 @@ public enum ErrorStatus {
     BRANCH_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 창고 지점입니다."),
     ROP_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 ROP Id입니다"),
     INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 창고, 부품으로 등록된 재고가 없습니다"),
-
+    WAREHOUSE_NOT_FOUND(HttpStatus.NOT_FOUND, "창고가 존재하지 않습니다"),
 
 
     // 409 CONFLICT
