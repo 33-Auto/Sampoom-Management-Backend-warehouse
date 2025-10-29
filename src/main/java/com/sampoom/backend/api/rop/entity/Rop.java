@@ -19,7 +19,15 @@ public class Rop {
     @JoinColumn(name = "inventory_id")
     private Inventory inventory;
 
+    @Column(nullable = false)
     private Integer rop;
-    private Status autoOrderStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private Status autoOrderStatus = Status.ACTIVE;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status autoCalStatus;
 }

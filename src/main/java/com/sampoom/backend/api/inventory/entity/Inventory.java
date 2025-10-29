@@ -38,4 +38,7 @@ public class Inventory extends BaseTimeEntity {
 
     @Column(name = "lead_time")
     private Integer leadTime;
+
+    @Column(name = "max_stock")
+    private Integer maxStock;
 }
