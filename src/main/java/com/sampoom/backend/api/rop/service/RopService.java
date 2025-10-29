@@ -9,6 +9,7 @@ import com.sampoom.backend.api.rop.dto.RopReqDto;
 import com.sampoom.backend.api.rop.dto.RopResDto;
 import com.sampoom.backend.api.rop.dto.UpdateRopReqDto;
 import com.sampoom.backend.api.rop.entity.Rop;
+import com.sampoom.backend.api.rop.entity.Status;
 import com.sampoom.backend.api.rop.repository.RopRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
@@ -21,9 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RopService {
-    private final BranchRepository branchRepository;
     private final RopRepository ropRepository;
-    private final PartRepository partRepository;
     private final InventoryRepository inventoryRepository;
 
     @Transactional
@@ -50,12 +49,17 @@ public class RopService {
         inventory.setMaxStock(ropReqDto.getMaxStock());
         inventoryRepository.save(inventory);
 
-        Rop newRop = Rop.builder()
-                .inventory(inventory)
-                .rop(ropReqDto.getAverageDaily() *  inventory.getLeadTime() + inventory.getPart().getSafetyStock())
-                .autoCalStatus(ropReqDto.getAutoCalStatus())
-                .build();
-        ropRepository.save(newRop);
+        Rop rop = ropRepository.findByInventory_Id(inventory.getId()).orElse(
+                Rop.builder()
+                        .inventory(inventory)
+                        .build()
+        );
+
+        rop.setRop(ropReqDto.getAverageDaily() *  inventory.getLeadTime() + inventory.getPart().getSafetyStock());
+        rop.setAutoOrderStatus(Status.ACTIVE);
+        rop.setAutoCalStatus(rop.getAutoCalStatus());
+        rop.setIsDeleted(false);
+        ropRepository.save(rop);
     }
 
     @Transactional(readOnly = true)

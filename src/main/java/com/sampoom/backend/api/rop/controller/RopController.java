@@ -35,7 +35,7 @@ public class RopController {
     }
 
     @PatchMapping
-    public ResponseEntity<ApiResponse<Void>> updateRop(UpdateRopReqDto updateRopReqDto) {
+    public ResponseEntity<ApiResponse<Void>> updateRop(@RequestBody UpdateRopReqDto updateRopReqDto) {
         ropService.updateRop(updateRopReqDto);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
