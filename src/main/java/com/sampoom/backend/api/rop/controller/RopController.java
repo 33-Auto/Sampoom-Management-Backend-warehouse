@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.rop.controller;
 
+import com.sampoom.backend.api.rop.dto.RopReqDto;
 import com.sampoom.backend.api.rop.dto.RopResDto;
 import com.sampoom.backend.api.rop.dto.UpdateRopReqDto;
 import com.sampoom.backend.api.rop.entity.Rop;
@@ -19,6 +20,12 @@ public class RopController {
     @PostMapping("/{warehouseId}")
     public ResponseEntity<ApiResponse<Void>> createRop(@PathVariable Long warehouseId) {
         ropService.createRop(warehouseId);
+        return ApiResponse.success_only(SuccessStatus.CREATED);
+    }
+
+    @PostMapping("create/single")
+    public ResponseEntity<ApiResponse<Void>> createSingleRop(@RequestBody RopReqDto ropReqDto) {
+        ropService.createSingleRop(ropReqDto);
         return ApiResponse.success_only(SuccessStatus.CREATED);
     }
 

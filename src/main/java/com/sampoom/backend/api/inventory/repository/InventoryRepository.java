@@ -30,8 +30,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
-    INSERT INTO inventory (branch_id, part_id, quantity, average_daily, lead_time, created_at, updated_at)
-    SELECT :branchId, p.id, 0, 200, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    INSERT INTO inventory (branch_id, part_id, quantity, average_daily, lead_time, max_stock, created_at, updated_at)
+    SELECT :branchId, p.id, p.safety_stock, p.safety_stock, 5, 500, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     FROM part p
     WHERE NOT EXISTS (
         SELECT 1 FROM inventory i
@@ -53,4 +53,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     @Query("SELECT i FROM Inventory i JOIN FETCH i.part WHERE i.branch.id = :branchId")
     List<Inventory> findWithPartByBranchId(@Param("branchId") Long branchId);
+
+    Optional<Inventory> findByBranch_IdAndPart_Code(Long branchId, String code);
 }

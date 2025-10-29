@@ -29,5 +29,6 @@ public class Rop {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status autoCalStatus;
+    @Builder.Default
+    private Status autoCalStatus = Status.INACTIVE;
 }

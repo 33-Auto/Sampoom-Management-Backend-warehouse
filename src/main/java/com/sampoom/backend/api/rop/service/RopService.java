@@ -7,6 +7,7 @@ import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.api.rop.dto.RopItem;
+import com.sampoom.backend.api.rop.dto.RopReqDto;
 import com.sampoom.backend.api.rop.dto.RopResDto;
 import com.sampoom.backend.api.rop.dto.UpdateRopReqDto;
 import com.sampoom.backend.api.rop.entity.Rop;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,23 @@ public class RopService {
                             .build();
                 }).toList();
         ropRepository.saveAll(rops);
+    }
+
+    public void createSingleRop(RopReqDto ropReqDto) {
+        Inventory inventory = inventoryRepository.findByBranch_IdAndPart_Code(ropReqDto.getWarehouseId(), ropReqDto.getPartCode())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
+
+        inventory.setLeadTime(ropReqDto.getLeadTime());
+        inventory.setAverageDaily(ropReqDto.getAverageDaily());
+        inventory.setMaxStock(ropReqDto.getMaxStock());
+        inventoryRepository.save(inventory);
+
+        Rop newRop = Rop.builder()
+                .inventory(inventory)
+                .rop(ropReqDto.getAverageDaily() *  inventory.getLeadTime() + inventory.getPart().getSafetyStock())
+                .autoCalStatus(ropReqDto.getAutoCalStatus())
+                .build();
+        ropRepository.save(newRop);
     }
 
     @Transactional(readOnly = true)
