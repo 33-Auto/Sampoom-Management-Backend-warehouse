@@ -40,7 +40,7 @@ public class RopController {
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{ropId}")
     public ResponseEntity<ApiResponse<Void>> deleteRop(@PathVariable Long ropId) {
         ropService.deleteRop(ropId);
         return ApiResponse.success_only(SuccessStatus.OK);
