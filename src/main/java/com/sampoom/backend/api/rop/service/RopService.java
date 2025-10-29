@@ -42,7 +42,7 @@ public class RopService {
     @Transactional
     public void createSingleRop(RopReqDto ropReqDto) {
         Inventory inventory = inventoryRepository.findByBranch_IdAndPart_Code(ropReqDto.getWarehouseId(), ropReqDto.getPartCode())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
 
         inventory.setLeadTime(ropReqDto.getLeadTime());
         inventory.setAverageDaily(ropReqDto.getAverageDaily());
@@ -55,7 +55,7 @@ public class RopService {
                         .build()
         );
 
-        rop.setRop(ropReqDto.getAverageDaily() *  inventory.getLeadTime() + inventory.getPart().getSafetyStock());
+        rop.setRop(ropReqDto.getAverageDaily() *  ropReqDto.getLeadTime() + inventory.getPart().getSafetyStock());
         rop.setAutoOrderStatus(Status.ACTIVE);
         rop.setAutoCalStatus(rop.getAutoCalStatus());
         rop.setIsDeleted(false);
