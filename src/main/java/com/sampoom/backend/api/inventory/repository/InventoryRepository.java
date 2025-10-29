@@ -28,10 +28,10 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
             @Param("groupId") Long groupId
     );
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value = """
-    INSERT INTO inventory (branch_id, part_id, quantity, created_at, updated_at)
-    SELECT :branchId, p.id, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    INSERT INTO inventory (branch_id, part_id, quantity, average_daily, lead_time, max_stock, created_at, updated_at)
+    SELECT :branchId, p.id, p.safety_stock*2, p.safety_stock, 5, p.safety_stock*5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     FROM part p
     WHERE NOT EXISTS (
         SELECT 1 FROM inventory i
@@ -43,9 +43,16 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Inventory> findByBranch_IdAndPart_IdIn(Long branchId, List<Long> partIds);
 
+    List<Inventory> findByBranch_Id(Long branchId);
+
     Optional<Inventory> findByBranch_IdAndPart_Id(Long branchId, Long partId);
 
     @Query("SELECT i.quantity FROM Inventory i WHERE i.branch.id = :warehouseId AND i.part.code = :code")
     Integer findStockByWarehouseIdAndCode(@Param("warehouseId") Long warehouseId,
                                           @Param("code") String code);
+
+    @Query("SELECT i FROM Inventory i JOIN FETCH i.part WHERE i.branch.id = :branchId")
+    List<Inventory> findWithPartByBranchId(@Param("branchId") Long branchId);
+
+    Optional<Inventory> findByBranch_IdAndPart_Code(Long branchId, String code);
 }

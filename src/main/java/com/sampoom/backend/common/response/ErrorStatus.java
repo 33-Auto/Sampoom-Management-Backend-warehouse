@@ -30,6 +30,9 @@ public enum ErrorStatus {
     // 404 NOT_FOUND
     NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
     PART_NOT_FOUND(HttpStatus.NOT_FOUND, "창고에 존재하지 않는 부품입니다."),
+    BRANCH_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 창고 지점입니다."),
+    ROP_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 ROP Id입니다"),
+    INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 창고, 부품으로 등록된 재고가 없습니다"),
 
 
 

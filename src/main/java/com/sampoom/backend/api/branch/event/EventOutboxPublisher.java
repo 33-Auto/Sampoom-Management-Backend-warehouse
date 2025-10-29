@@ -21,31 +21,31 @@ public class EventOutboxPublisher {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 2000)
-    public void publishPendingEvents() {
-        List<EventOutbox> pendingEvents = eventOutboxRepository.findByStatus(EventStatus.PENDING);
-        List<EventOutbox> retryEvents = eventOutboxRepository.findByStatus(EventStatus.FAILED);
-        pendingEvents.addAll(retryEvents);
-
-        for (EventOutbox event : pendingEvents) {
-            try {
-                kafkaTemplate.send(event.getTopic(), objectMapper.writeValueAsString(event.getPayload()))
-                        .thenAccept(result -> {
-                            event.setStatus(EventStatus.PUBLISHED);
-                            eventOutboxRepository.save(event);
-                            log.info("✅ Sent outbox event: {}", event.getId());
-                        })
-                        .exceptionally(ex -> {
-                            event.setStatus(EventStatus.FAILED);
-                            eventOutboxRepository.save(event);
-                            log.error("❌ Failed to send outbox event: {}", event.getId(), ex);
-                            return null;
-                        });
-            } catch (Exception e) {
-                event.setStatus(EventStatus.FAILED);
-                eventOutboxRepository.save(event);
-                log.error("❌ Failed to serialize event: {}", event.getId(), e);
-            }
-        }
-    }
+//    @Scheduled(fixedDelay = 2000)
+//    public void publishPendingEvents() {
+//        List<EventOutbox> pendingEvents = eventOutboxRepository.findByStatus(EventStatus.PENDING);
+//        List<EventOutbox> retryEvents = eventOutboxRepository.findByStatus(EventStatus.FAILED);
+//        pendingEvents.addAll(retryEvents);
+//
+//        for (EventOutbox event : pendingEvents) {
+//            try {
+//                kafkaTemplate.send(event.getTopic(), objectMapper.writeValueAsString(event.getPayload()))
+//                        .thenAccept(result -> {
+//                            event.setStatus(EventStatus.PUBLISHED);
+//                            eventOutboxRepository.save(event);
+//                            log.info("✅ Sent outbox event: {}", event.getId());
+//                        })
+//                        .exceptionally(ex -> {
+//                            event.setStatus(EventStatus.FAILED);
+//                            eventOutboxRepository.save(event);
+//                            log.error("❌ Failed to send outbox event: {}", event.getId(), ex);
+//                            return null;
+//                        });
+//            } catch (Exception e) {
+//                event.setStatus(EventStatus.FAILED);
+//                eventOutboxRepository.save(event);
+//                log.error("❌ Failed to serialize event: {}", event.getId(), e);
+//            }
+//        }
+//    }
 }
