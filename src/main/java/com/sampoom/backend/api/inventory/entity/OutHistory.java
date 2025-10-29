@@ -16,8 +16,8 @@ public class OutHistory extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inventory_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "inventory_id", nullable = false)
     private Inventory inventory;
 
     @Column(nullable = false)
