@@ -29,7 +29,7 @@ public class PartEventConsumer {
     private final PartService partService;
 
     @Transactional
-    @KafkaListener(topics = "part-events")
+    @KafkaListener(topics = {"part-events", "part-group-events", "part-category-events"})
     public void consume(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
