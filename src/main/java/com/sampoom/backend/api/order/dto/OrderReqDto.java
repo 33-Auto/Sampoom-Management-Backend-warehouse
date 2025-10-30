@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Getter
@@ -15,9 +16,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderReqDto {
+    @NotBlank(message = "주문 아이디가 없습니다.")
+    private Long orderId;
+
     @NotBlank(message = "주문 지점 정보는 필수입니다")
-    private String branch;
+    private Long branchId;
+
     @NotEmpty(message = "주문 항목은 최소 1개 이상이어야 합니다")
     @Valid
     private List<ItemDto> items;
+
+    private Long version;
+    private OffsetDateTime sourceUpdatedAt;
 }
