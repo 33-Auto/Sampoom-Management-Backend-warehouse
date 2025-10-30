@@ -11,6 +11,7 @@ import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class PartService {
     private final PartGroupRepository partGroupRepository;
     private final CategoryRepository categoryRepository;
 
+    @Transactional
     public void createPartCategory(PartCategoryPayload payload) {
         Category category = Category.builder()
                 .id(payload.getCategoryId())
@@ -29,6 +31,7 @@ public class PartService {
         categoryRepository.save(category);
     }
 
+    @Transactional
     public void createPartGroup(PartGroupPayload payload) {
         PartGroup group = PartGroup.builder()
                 .id(payload.getGroupId())
@@ -40,6 +43,7 @@ public class PartService {
         partGroupRepository.save(group);
     }
 
+    @Transactional
     public void createPart(PartPayload payload) {
         Part part = Part.builder()
                 .id(payload.getPartId())
