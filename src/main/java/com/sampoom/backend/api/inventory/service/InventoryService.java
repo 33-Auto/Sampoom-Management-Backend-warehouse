@@ -71,22 +71,10 @@ public class InventoryService {
             }
         }
 
-        // 현재 수량 조회
-        List<Long> partIds = updatePartReqDtos.stream()
-                .map(UpdatePartReqDto::getId)
-                .toList();
-        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
-
-        Map<Long, Inventory> invMap = inventories.stream()
-                .collect(Collectors.toMap(i -> i.getPart().getId(), i -> i));
-
-        // 0 미만 예외 확인
+        // 현재 수량 조회 & 미만 예외 확인
         for (UpdatePartReqDto dto : updatePartReqDtos) {
-            Inventory inv = invMap.get(dto.getId());
-
-            if (inv == null) {
-                throw new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage() + " partId: " + dto.getId());
-            }
+            Inventory inv = inventoryRepository.findByBranch_IdAndPart_Id(warehouseId, dto.getId())
+                    .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
 
             if (inv.getQuantity() + dto.getDelta() < 0) {
                 throw new BadRequestException(ErrorStatus.INVALID_PART_QUANTITY.getMessage() + " partId: " + dto.getId());
@@ -115,6 +103,10 @@ public class InventoryService {
         params.forEach(query::setParameter);
 
         query.executeUpdate();
+    }
+
+    public void checkRop(Long warehouseId, List<UpdatePartReqDto> updatePartReqDtos) {
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, updatePartReqDtos.stream().map(UpdatePartReqDto::getId).collect(Collectors.toList()));
     }
 
     public boolean isStockAvailable(OrderReqDto orderReqDto) {

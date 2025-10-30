@@ -101,4 +101,5 @@ public class RopService {
         rop.setIsDeleted(true);
         ropRepository.save(rop);
     }
+
 }
