@@ -2,6 +2,8 @@ package com.sampoom.backend.api.part.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sampoom.backend.api.part.dto.Event;
+import com.sampoom.backend.api.part.dto.PartGroupPayload;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupEventConsumer {
     private final PartGroupRepository partGroupRepository;
     private final ObjectMapper objectMapper;
+    private final EventPayloadMapper eventPayloadMapper;
 
     @KafkaListener(topics = "part-group-events")
     @Transactional
@@ -23,23 +26,24 @@ public class GroupEventConsumer {
         try {
             JsonNode root = objectMapper.readTree(message);
             String eventType = root.get("eventType").asText();
+            Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
+            Event<?> event = objectMapper.readValue(
+                    message,
+                    objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
+            );
 
             if ("PartGroupCreated".equals(eventType)) {
-                JsonNode payload = root.get("payload");
-                Long groupId = payload.get("groupId").asLong();
-                Long categoryId = payload.get("categoryId").asLong();
-                String groupName = payload.get("groupName").asText();
-                String groupCode = payload.get("groupCode").asText();
+                PartGroupPayload payload = (PartGroupPayload) event.getPayload();
 
                 PartGroup group = PartGroup.builder()
-                        .id(groupId)
-                        .categoryId(categoryId)
-                        .name(groupName)
-                        .code(groupCode)
+                        .id(payload.getGroupId())
+                        .categoryId(payload.getCategoryId())
+                        .name(payload.getGroupName())
+                        .code(payload.getGroupCode())
                         .build();
 
                 partGroupRepository.save(group);
-                log.info("✅ partGroupCreated saved: {}", groupName);
+                log.info("✅ partGroupCreated saved: {}", payload.getGroupName());
             }
 
         } catch (Exception e) {

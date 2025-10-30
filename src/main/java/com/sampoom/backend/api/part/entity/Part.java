@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.part.entity;
 
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
+import com.sampoom.backend.common.entitiy.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +22,8 @@ public class Part extends BaseTimeEntity {
     private String name;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @Column(nullable = false)
     private String unit;

@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.rop.entity;
+package com.sampoom.backend.common.entitiy;
 
 import lombok.Getter;
 

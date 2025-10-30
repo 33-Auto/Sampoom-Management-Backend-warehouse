@@ -19,6 +19,7 @@ public enum ErrorStatus {
     INVALID_PART_QUANTITY(HttpStatus.BAD_REQUEST, "부품의 재고 수량은 0 이상이어야 합니다."),
     DUPLICATED_PART(HttpStatus.BAD_REQUEST, "중복된 부품 아이디가 있습니다"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "잘못된 주문 상태입니다."),
+    INVALID_QUANTITY_STATUS(HttpStatus.BAD_REQUEST, "잘못된 재고 수량 상태입니다."),
 
 
     // 401 UNAUTHORIZED

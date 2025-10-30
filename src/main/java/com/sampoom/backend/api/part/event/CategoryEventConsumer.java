@@ -2,6 +2,8 @@ package com.sampoom.backend.api.part.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sampoom.backend.api.part.dto.Event;
+import com.sampoom.backend.api.part.dto.PartCategoryPayload;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryEventConsumer {
     private final CategoryRepository categoryRepository;
     private final ObjectMapper objectMapper;
+    private final EventPayloadMapper eventPayloadMapper;
 
     @KafkaListener(topics = "part-category-events")
     @Transactional
@@ -23,21 +26,24 @@ public class CategoryEventConsumer {
         try {
             JsonNode root = objectMapper.readTree(message);
             String eventType = root.get("eventType").asText();
+            Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
+            Event<?> event = objectMapper.readValue(
+                    message,
+                    objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
+            );
+
 
             if ("PartCategoryCreated".equals(eventType)) {
-                JsonNode payload = root.get("payload");
-                Long categoryId = payload.get("categoryId").asLong();
-                String categoryName = payload.get("categoryName").asText();
-                String categoryCode = payload.get("categoryCode").asText();
+                PartCategoryPayload payload = (PartCategoryPayload) event.getPayload();
 
                 Category category = Category.builder()
-                        .id(categoryId)
-                        .name(categoryName)
-                        .code(categoryCode)
+                        .id(payload.getCategoryId())
+                        .name(payload.getCategoryName())
+                        .code(payload.getCategoryCode())
                         .build();
 
                 categoryRepository.save(category);
-                log.info("✅ PartCategoryCreated saved: {}", categoryName);
+                log.info("✅ PartCategoryCreated saved: {}", payload.getCategoryName());
             }
 
         } catch (Exception e) {

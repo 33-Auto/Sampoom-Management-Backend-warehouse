@@ -2,11 +2,14 @@ package com.sampoom.backend.api.part.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sampoom.backend.api.part.dto.Event;
+import com.sampoom.backend.api.part.dto.PartPayload;
 import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.codec.multipart.PartEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -16,39 +19,36 @@ import org.springframework.stereotype.Service;
 public class PartEventConsumer {
     private final PartRepository partRepository;
     private final ObjectMapper objectMapper;
+    private final EventPayloadMapper eventPayloadMapper;
 
     @KafkaListener(topics = "part-events")
     public void consume(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
             String eventType = root.get("eventType").asText();
+            Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
+            Event<?> event = objectMapper.readValue(
+                    message,
+                    objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
+            );
 
             if ("PartCreated".equals(eventType)) {
-                JsonNode payload = root.get("payload");
-                Long partId = payload.get("partId").asLong();
-                Long groupId = payload.get("groupId").asLong();
-                Long categoryId = payload.get("categoryId").asLong();
-                String name = payload.get("name").asText();
-                String code = payload.get("code").asText();
-                Boolean isDeleted = payload.get("deleted").asBoolean();
-                String status = payload.get("status").asText();
-                String unit = payload.get("unit").asText();
-                Integer safetyStock = payload.get("safetyStock").asInt();
+                PartPayload payload = (PartPayload) event.getPayload();
 
                 Part part = Part.builder()
-                        .id(partId)
-                        .groupId(groupId)
-                        .categoryId(categoryId)
-                        .name(name)
-                        .code(code)
-                        .isDeleted(isDeleted)
-                        .status(status)
-                        .unit(unit)
-                        .safetyStock(safetyStock)
+                        .id(payload.getPartId())
+                        .groupId(payload.getGroupId())
+                        .categoryId(payload.getCategoryId())
+                        .name(payload.getName())
+                        .code(payload.getCode())
+                        .isDeleted(payload.getDeleted())
+                        .status(payload.getStatus())
+                        .unit(payload.getPartUnit())
+                        .safetyStock(payload.getBaseQuantity())
                         .build();
 
                 partRepository.save(part);
-                log.info("✅ partCreated saved: {}", name);
+                log.info("✅ partCreated saved: {}", payload.getName());
             }
 
         } catch (Exception e) {
