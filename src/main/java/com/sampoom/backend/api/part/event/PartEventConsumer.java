@@ -48,11 +48,11 @@ public class PartEventConsumer {
                         .build();
 
                 partRepository.save(part);
-                log.info("✅ partGroupCreated saved: {}", name);
+                log.info("✅ partCreated saved: {}", name);
             }
 
         } catch (Exception e) {
-            log.error("❌ Failed to process PartGroupCreated event", e);
+            log.error("❌ Failed to process PartCreated event", e);
         }
     }
 }
