@@ -1,7 +1,6 @@
 package com.sampoom.backend.api.rop.dto;
 
-import com.sampoom.backend.api.rop.entity.Status;
-import jakarta.persistence.Column;
+import com.sampoom.backend.common.entitiy.Status;
 import lombok.Getter;
 
 @Getter

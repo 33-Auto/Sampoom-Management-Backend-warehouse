@@ -10,7 +10,4 @@ import org.springframework.stereotype.Service;
 public class OrderService {
     private final InventoryRepository inventoryRepository;
 
-    public void orderProcess(OrderReqDto orderReqDto) {
-
-    }
 }

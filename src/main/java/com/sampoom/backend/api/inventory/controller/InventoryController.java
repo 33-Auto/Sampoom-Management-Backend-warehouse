@@ -5,6 +5,7 @@ import com.sampoom.backend.api.inventory.dto.GroupResDto;
 import com.sampoom.backend.api.inventory.dto.PartResDto;
 import com.sampoom.backend.api.inventory.dto.UpdatePartReqDto;
 import com.sampoom.backend.api.inventory.service.InventoryService;
+import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class InventoryController {
                 .rop(60)
                 .unit("EA")
                 .partValue(38250000)
-                .status("충분")
+                .status(QuantityStatus.ENOUGH)
                 .build());
 
         return ApiResponse.success(SuccessStatus.OK, parts);
