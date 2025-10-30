@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.branch.entity;
+package com.sampoom.backend.api.event.entity;
 
 import lombok.Getter;
 
