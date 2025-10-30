@@ -1,10 +1,9 @@
 package com.sampoom.backend.api.inventory.service;
 
-import com.sampoom.backend.api.branch.entity.Branch;
-import com.sampoom.backend.api.branch.entity.EventOutbox;
-import com.sampoom.backend.api.branch.entity.EventStatus;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
-import com.sampoom.backend.api.branch.repository.EventOutboxRepository;
+import com.sampoom.backend.api.event.entity.EventOutbox;
+import com.sampoom.backend.api.event.entity.EventStatus;
+import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.inventory.dto.CategoryResDto;
 import com.sampoom.backend.api.inventory.dto.GroupResDto;
 import com.sampoom.backend.api.inventory.dto.PartResDto;
