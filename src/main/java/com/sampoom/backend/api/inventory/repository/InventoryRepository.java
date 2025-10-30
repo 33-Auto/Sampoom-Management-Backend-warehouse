@@ -13,15 +13,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
-    @Query("SELECT new com.sampoom.backend.api.inventory.dto.PartResDto(" +
-            "p.id, c.name, g.name, p.name, p.code, i.quantity, p.status) " +
-            "FROM Inventory i " +
-            "JOIN Part p ON i.part.id = p.id " +
-            "JOIN PartGroup g ON p.groupId = g.id " +
-            "JOIN Category c ON g.categoryId = c.id " +
-            "WHERE i.branch.id = :branchId " +
-            "AND (:categoryId IS NULL OR c.id = :categoryId) " +
-            "AND (:groupId IS NULL OR g.id = :groupId)")
+    @Query("""
+            SELECT new com.sampoom.backend.api.inventory.dto.PartResDto(
+            p.id, c.name, g.name, p.name, p.code, i.quantity, i.quantityStatus)
+            FROM Inventory i
+            JOIN i.part p
+            JOIN PartGroup g ON p.groupId = g.id
+            JOIN Category c ON g.categoryId = c.id
+            WHERE i.branch.id = :branchId
+            AND (:categoryId IS NULL OR c.id = :categoryId)
+            AND (:groupId IS NULL OR g.id = :groupId)
+            """)
     List<PartResDto> findParts(
             @Param("branchId") Long branchId,
             @Param("categoryId") Long categoryId,
@@ -30,7 +32,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
-    INSERT INTO inventory (branch_id, part_id, quantity, average_daily, lead_time, max_stock, created_at, updated_at)
+    INSERT INTO inventory (branch_id, part_id, quantity, quantity_status, average_daily, lead_time, max_stock, created_at, updated_at)
     SELECT :branchId, p.id, p.safety_stock*2, p.safety_stock, 5, p.safety_stock*5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     FROM part p
     WHERE NOT EXISTS (

@@ -1,5 +1,7 @@
 package com.sampoom.backend.api.inventory.dto;
 
+import com.sampoom.backend.api.part.entity.QuantityStatus;
+import com.sampoom.backend.common.entitiy.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,9 +19,9 @@ public class PartResDto {
     private Integer rop;
     private String unit;
     private Integer partValue;
-    private String status;
+    private QuantityStatus status;
 
-    PartResDto(Long id, String category, String group, String name, String code, Integer quantity, String status) {
+    public PartResDto(Long id, String category, String group, String name, String code, Integer quantity, QuantityStatus status) {
         this.id = id;
         this.category = category;
         this.group = group;

@@ -1,9 +1,7 @@
 package com.sampoom.backend.api.rop.dto;
 
-import com.sampoom.backend.api.rop.entity.Status;
+import com.sampoom.backend.common.entitiy.Status;
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 public class UpdateRopReqDto {

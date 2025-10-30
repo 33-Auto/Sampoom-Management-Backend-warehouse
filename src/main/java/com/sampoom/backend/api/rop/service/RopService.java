@@ -1,15 +1,13 @@
 package com.sampoom.backend.api.rop.service;
 
-import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
-import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.api.rop.dto.RopItem;
 import com.sampoom.backend.api.rop.dto.RopReqDto;
 import com.sampoom.backend.api.rop.dto.RopResDto;
 import com.sampoom.backend.api.rop.dto.UpdateRopReqDto;
 import com.sampoom.backend.api.rop.entity.Rop;
-import com.sampoom.backend.api.rop.entity.Status;
+import com.sampoom.backend.common.entitiy.Status;
 import com.sampoom.backend.api.rop.repository.RopRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
