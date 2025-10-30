@@ -15,7 +15,7 @@ public class SalesEventConsumer {
     private final ObjectMapper objectMapper;
     private final OrderService orderService;
 
-    @KafkaListener(topics = "sales-event")
+    @KafkaListener(topics = "sales-events")
     public void consumer(String message) {
         try {
             OrderReqDto orderReqDto = objectMapper.readValue(message, OrderReqDto.class);
