@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.multipart.PartEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class PartEventConsumer {
     private final EventPayloadMapper eventPayloadMapper;
     private final PartService partService;
 
+    @Transactional
     @KafkaListener(topics = "part-events")
     public void consume(String message) {
         try {
