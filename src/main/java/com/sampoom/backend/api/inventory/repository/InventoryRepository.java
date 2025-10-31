@@ -2,7 +2,6 @@ package com.sampoom.backend.api.inventory.repository;
 
 import com.sampoom.backend.api.inventory.dto.PartResDto;
 import com.sampoom.backend.api.inventory.entity.Inventory;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+
+import static jakarta.persistence.LockModeType.PESSIMISTIC_WRITE;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Query("""
@@ -42,12 +43,12 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     """, nativeQuery = true)
     void initializeInventory(@Param("branchId") Long branchId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Lock(PESSIMISTIC_WRITE)
+    Optional<Inventory> findByBranch_IdAndPart_Id(Long branchId, Long partId);
+
     List<Inventory> findByBranch_IdAndPart_IdIn(Long branchId, List<Long> partIds);
 
     List<Inventory> findByBranch_Id(Long branchId);
-
-    Optional<Inventory> findByBranch_IdAndPart_Id(Long branchId, Long partId);
 
     @Query("SELECT i.quantity FROM Inventory i WHERE i.branch.id = :warehouseId AND i.part.code = :code")
     Integer findStockByWarehouseIdAndCode(@Param("warehouseId") Long warehouseId,

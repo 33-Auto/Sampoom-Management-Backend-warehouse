@@ -1,5 +1,9 @@
 package com.sampoom.backend.api.inventory.service;
 
+import com.sampoom.backend.api.branch.repository.BranchRepository;
+import com.sampoom.backend.api.event.entity.EventOutbox;
+import com.sampoom.backend.api.event.entity.EventStatus;
+import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.inventory.dto.CategoryResDto;
 import com.sampoom.backend.api.inventory.dto.GroupResDto;
 import com.sampoom.backend.api.inventory.dto.PartResDto;
@@ -11,6 +15,10 @@ import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
+import com.sampoom.backend.api.rop.dto.OrderToFactoryDto;
+import com.sampoom.backend.api.rop.entity.Rop;
+import com.sampoom.backend.api.rop.repository.RopRepository;
+import com.sampoom.backend.common.entitiy.Status;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
@@ -30,6 +38,9 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final CategoryRepository categoryRepository;
     private final PartGroupRepository partGroupRepository;
+    private final RopRepository ropRepository;
+    private final EventOutboxRepository eventOutboxRepository;
+    private final BranchRepository branchRepository;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -71,22 +82,10 @@ public class InventoryService {
             }
         }
 
-        // 현재 수량 조회
-        List<Long> partIds = updatePartReqDtos.stream()
-                .map(UpdatePartReqDto::getId)
-                .toList();
-        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
-
-        Map<Long, Inventory> invMap = inventories.stream()
-                .collect(Collectors.toMap(i -> i.getPart().getId(), i -> i));
-
-        // 0 미만 예외 확인
+        // 현재 수량 조회 & 미만 예외 확인
         for (UpdatePartReqDto dto : updatePartReqDtos) {
-            Inventory inv = invMap.get(dto.getId());
-
-            if (inv == null) {
-                throw new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage() + " partId: " + dto.getId());
-            }
+            Inventory inv = inventoryRepository.findByBranch_IdAndPart_Id(warehouseId, dto.getId())
+                    .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
 
             if (inv.getQuantity() + dto.getDelta() < 0) {
                 throw new BadRequestException(ErrorStatus.INVALID_PART_QUANTITY.getMessage() + " partId: " + dto.getId());
@@ -115,6 +114,38 @@ public class InventoryService {
         params.forEach(query::setParameter);
 
         query.executeUpdate();
+    }
+
+    @Transactional
+    public void checkRop(Long warehouseId, List<UpdatePartReqDto> updatePartReqDtos) {
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, updatePartReqDtos.stream().map(UpdatePartReqDto::getId).collect(Collectors.toList()));
+        List<ItemDto> lackItems = new ArrayList<>();
+        String warehouseName = inventories.get(0).getBranch().getName();
+
+        // 재고 없는 것들 수집
+        for (Inventory inventory : inventories) {
+            Rop rop = ropRepository.findWithInventoryByInventory_IdAndAutoOrderStatusAndIsDeletedFalse(inventory.getId(), Status.ACTIVE)
+                    .orElseThrow(() -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage()));
+
+            if (inventory.getQuantity() <= rop.getRop()) {
+                lackItems.add(ItemDto.builder()
+                        .code(inventory.getPart().getCode())
+                        .quantity(inventory.getMaxStock() - inventory.getQuantity())
+                        .build());
+            }
+        }
+
+        // 주문서 발행
+        EventOutbox eventOutbox = EventOutbox.builder()
+                .topic("order-to-factory-events")
+                .payload(OrderToFactoryDto.builder()
+                        .warehouseName(warehouseName)
+                        .items(lackItems)
+                        .build()
+                )
+                .status(EventStatus.PENDING)
+                .build();
+        eventOutboxRepository.save(eventOutbox);
     }
 
     public boolean isStockAvailable(OrderReqDto orderReqDto) {

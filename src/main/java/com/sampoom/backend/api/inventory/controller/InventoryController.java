@@ -77,6 +77,7 @@ public class InventoryController {
     @PatchMapping("/{warehouseId}")
     public ResponseEntity<ApiResponse<Void>> updateParts(@PathVariable Long warehouseId, @RequestBody List<UpdatePartReqDto> parts) {
         inventoryService.updateParts(warehouseId, parts);
+        inventoryService.checkRop(warehouseId, parts);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 }
