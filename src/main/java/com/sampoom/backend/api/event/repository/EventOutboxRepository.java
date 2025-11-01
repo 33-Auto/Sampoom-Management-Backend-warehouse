@@ -1,9 +1,8 @@
-package com.sampoom.backend.api.branch.repository;
+package com.sampoom.backend.api.event.repository;
 
-import com.sampoom.backend.api.branch.entity.EventOutbox;
-import com.sampoom.backend.api.branch.entity.EventStatus;
+import com.sampoom.backend.api.event.entity.EventOutbox;
+import com.sampoom.backend.api.event.entity.EventStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

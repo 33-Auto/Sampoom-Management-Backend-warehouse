@@ -19,6 +19,7 @@ public enum ErrorStatus {
     INVALID_PART_QUANTITY(HttpStatus.BAD_REQUEST, "부품의 재고 수량은 0 이상이어야 합니다."),
     DUPLICATED_PART(HttpStatus.BAD_REQUEST, "중복된 부품 아이디가 있습니다"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "잘못된 주문 상태입니다."),
+    INVALID_QUANTITY_STATUS(HttpStatus.BAD_REQUEST, "잘못된 재고 수량 상태입니다."),
 
 
     // 401 UNAUTHORIZED
@@ -30,7 +31,12 @@ public enum ErrorStatus {
     // 404 NOT_FOUND
     NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
     PART_NOT_FOUND(HttpStatus.NOT_FOUND, "창고에 존재하지 않는 부품입니다."),
-
+    BRANCH_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 창고 지점입니다."),
+    ROP_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 ROP Id입니다"),
+    INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 창고, 부품으로 등록된 재고가 없습니다"),
+    WAREHOUSE_NOT_FOUND(HttpStatus.NOT_FOUND, "창고가 존재하지 않습니다"),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리가 존재하지 않습니다."),
+    GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹이 존재하지 않습니다."),
 
 
     // 409 CONFLICT

@@ -2,6 +2,7 @@ package com.sampoom.backend.api.inventory.entity;
 
 import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,4 +33,18 @@ public class Inventory extends BaseTimeEntity {
     public void updateQuantity(int dq) {
         this.quantity += dq;
     }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "quantity_status", nullable = false)
+    @Builder.Default
+    private QuantityStatus quantityStatus = QuantityStatus.ENOUGH;
+
+    @Column(name = "average_daily", nullable = false)
+    private Integer averageDaily;
+
+    @Column(name = "lead_time", nullable = false)
+    private Integer leadTime;
+
+    @Column(name = "max_stock", nullable = false)
+    private Integer maxStock;
 }

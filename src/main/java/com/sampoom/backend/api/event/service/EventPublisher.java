@@ -1,27 +1,26 @@
-package com.sampoom.backend.api.branch.event;
+package com.sampoom.backend.api.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sampoom.backend.api.branch.entity.EventOutbox;
-import com.sampoom.backend.api.branch.entity.EventStatus;
-import com.sampoom.backend.api.branch.repository.EventOutboxRepository;
+import com.sampoom.backend.api.event.entity.EventOutbox;
+import com.sampoom.backend.api.event.entity.EventStatus;
+import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
-public class EventOutboxPublisher {
-    private final EventOutboxRepository eventOutboxRepository;
+@Slf4j
+public class EventPublisher {
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final EventOutboxRepository eventOutboxRepository;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(fixedDelay = 5000)
     public void publishPendingEvents() {
         List<EventOutbox> pendingEvents = eventOutboxRepository.findByStatus(EventStatus.PENDING);
         List<EventOutbox> retryEvents = eventOutboxRepository.findByStatus(EventStatus.FAILED);

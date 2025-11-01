@@ -1,13 +1,13 @@
 package com.sampoom.backend.api.inventory.controller;
 
-import com.sampoom.backend.api.inventory.dto.CategoryResDto;
-import com.sampoom.backend.api.inventory.dto.GroupResDto;
-import com.sampoom.backend.api.inventory.dto.PartResDto;
-import com.sampoom.backend.api.inventory.dto.UpdatePartReqDto;
+import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.service.InventoryService;
+import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,24 +58,31 @@ public class InventoryController {
                 .rop(60)
                 .unit("EA")
                 .partValue(38250000)
-                .status("충분")
+                .status(QuantityStatus.ENOUGH)
                 .build());
 
         return ApiResponse.success(SuccessStatus.OK, parts);
     }
 
-    @GetMapping("/{warehouseId}")
-    public ResponseEntity<ApiResponse<List<PartResDto>>> getParts(
-            @PathVariable Long warehouseId,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long groupId
-    ) {
-        return ApiResponse.success(SuccessStatus.OK, inventoryService.findParts(warehouseId, categoryId, groupId));
-    }
+//    @GetMapping("/{warehouseId}/all")
+//    public ResponseEntity<ApiResponse<List<PartResDto>>> getParts(
+//            @PathVariable Long warehouseId,
+//            @RequestParam(required = false) Long categoryId,
+//            @RequestParam(required = false) Long groupId
+//    ) {
+//        return ApiResponse.success(SuccessStatus.OK, inventoryService.findParts(warehouseId, categoryId, groupId));
+//    }
 
     @PatchMapping("/{warehouseId}")
     public ResponseEntity<ApiResponse<Void>> updateParts(@PathVariable Long warehouseId, @RequestBody List<UpdatePartReqDto> parts) {
         inventoryService.updateParts(warehouseId, parts);
+        inventoryService.checkRop(warehouseId, parts);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<PartResDto>>> search(@ModelAttribute SearchReqDto req, Pageable pageable) {
+        return ApiResponse.success(SuccessStatus.OK, inventoryService.searchInventory(req, pageable));
+    }
+
 }

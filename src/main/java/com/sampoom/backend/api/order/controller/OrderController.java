@@ -1,12 +1,9 @@
 package com.sampoom.backend.api.order.controller;
 
-import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.inventory.service.InventoryService;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.OrderStatus;
-import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.common.response.ApiResponse;
-import com.sampoom.backend.common.response.ErrorStatus;
 import com.sampoom.backend.common.response.SuccessStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
