@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import static jakarta.persistence.LockModeType.PESSIMISTIC_WRITE;
 
-public interface InventoryRepository extends JpaRepository<Inventory, Long> {
+public interface InventoryRepository extends JpaRepository<Inventory, Long>, InventoryQueryRepository {
     @Query("""
             SELECT new com.sampoom.backend.api.inventory.dto.PartResDto(
             p.id, c.name, g.name, p.name, p.code, i.quantity, i.quantityStatus)
@@ -34,7 +34,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Modifying(clearAutomatically = true)
     @Query(value = """
     INSERT INTO inventory (branch_id, part_id, quantity, quantity_status, average_daily, lead_time, max_stock, created_at, updated_at)
-    SELECT :branchId, p.id, p.safety_stock*2, p.safety_stock, 5, p.safety_stock*5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    SELECT :branchId, p.id, p.safety_stock*2, 'ENOUGH', p.safety_stock, 5, p.safety_stock*5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     FROM part p
     WHERE NOT EXISTS (
         SELECT 1 FROM inventory i

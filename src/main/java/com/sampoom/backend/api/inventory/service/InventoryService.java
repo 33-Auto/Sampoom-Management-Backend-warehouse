@@ -4,15 +4,13 @@ import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.event.entity.EventOutbox;
 import com.sampoom.backend.api.event.entity.EventStatus;
 import com.sampoom.backend.api.event.repository.EventOutboxRepository;
-import com.sampoom.backend.api.inventory.dto.CategoryResDto;
-import com.sampoom.backend.api.inventory.dto.GroupResDto;
-import com.sampoom.backend.api.inventory.dto.PartResDto;
-import com.sampoom.backend.api.inventory.dto.UpdatePartReqDto;
+import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.part.entity.Category;
+import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.rop.dto.OrderToFactoryDto;
@@ -27,6 +25,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -161,4 +161,30 @@ public class InventoryService {
         return true;
     }
 
+    public Page<PartResDto> searchInventory(SearchReqDto req, Pageable pageable) {
+        return inventoryRepository.search(req, pageable)
+                .map(this::toResponse);
+    }
+
+    private PartResDto toResponse(Inventory inv) {
+        Category category = categoryRepository.findById(inv.getPart().getCategoryId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
+        PartGroup group = partGroupRepository.findById(inv.getPart().getGroupId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND.getMessage()));
+        Rop rop = ropRepository.findByInventory_Id(inv.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage()));
+
+        return PartResDto.builder()
+                .id(inv.getId())
+                .code(inv.getPart().getCode())
+                .name(inv.getPart().getName())
+                .category(category.getName())
+                .group(group.getName())
+                .quantity(inv.getQuantity())
+                .status(inv.getQuantityStatus())
+                .rop(rop.getRop())
+                .unit(inv.getPart().getUnit())
+                //.partValue(inv.getPart().getPartValue())
+                .build();
+    }
 }

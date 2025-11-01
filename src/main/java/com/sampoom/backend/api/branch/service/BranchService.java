@@ -36,18 +36,18 @@ public class BranchService {
         branchRepository.saveAndFlush(newBranch);
         inventoryRepository.initializeInventory(newBranch.getId());
 
-        EventOutbox eventOutbox = EventOutbox.builder()
-                .topic("warehouse-events")
-                .payload(BranchEvent.builder()
-                        .id(newBranch.getId())
-                        .name(newBranch.getName())
-                        .address(newBranch.getAddress())
-                        .status(newBranch.getStatus())
-                        .version(newBranch.getVersion())
-                        .sourceUpdatedAt(newBranch.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
-                        .build())
-                .build();
-        eventOutboxRepository.save(eventOutbox);
+//        EventOutbox eventOutbox = EventOutbox.builder()
+//                .topic("warehouse-events")
+//                .payload(BranchEvent.builder()
+//                        .id(newBranch.getId())
+//                        .name(newBranch.getName())
+//                        .address(newBranch.getAddress())
+//                        .status(newBranch.getStatus())
+//                        .version(newBranch.getVersion())
+//                        .sourceUpdatedAt(newBranch.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
+//                        .build())
+//                .build();
+//        eventOutboxRepository.save(eventOutbox);
 
         return BranchCreateResDto.builder()
                 .id(newBranch.getId())
