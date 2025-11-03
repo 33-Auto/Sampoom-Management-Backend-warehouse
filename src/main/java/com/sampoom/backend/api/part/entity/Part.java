@@ -30,20 +30,20 @@ public class Part extends BaseTimeEntity {
     private String unit;
 
     @Column(name = "lead_time", nullable = false)
-    private Integer leadTime;
+    private int leadTime;
 
     @Column(nullable = false)
-    private Boolean isDeleted;
+    private boolean isDeleted;
 
     @Column(name = "safety_stock", nullable = false)
-    private Integer safetyStock;
+    private int safetyStock;
 
     @Column(name = "standard_cost", nullable = false)
-    private Integer standardCost;
+    private int standardCost;
 
     @Column(name = "group_id", nullable = false)
-    private Long groupId;
+    private long groupId;
 
     @Column(name = "category_id", nullable = false)
-    private Long categoryId;
+    private long categoryId;
 }
