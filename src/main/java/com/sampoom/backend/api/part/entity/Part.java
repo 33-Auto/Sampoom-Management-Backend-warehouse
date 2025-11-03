@@ -32,7 +32,7 @@ public class Part extends BaseTimeEntity {
 
     @Column(name = "lead_time", nullable = false)
     @NotNull
-    private Integer leadTime;
+    private int leadTime;
 
     @Column(nullable = false)
     @NotNull
@@ -40,17 +40,17 @@ public class Part extends BaseTimeEntity {
 
     @Column(name = "safety_stock", nullable = false)
     @NotNull
-    private Integer safetyStock;
+    private int safetyStock;
 
     @Column(name = "standard_cost", nullable = false)
     @NotNull
-    private Integer standardCost;
+    private int standardCost;
 
     @Column(name = "group_id", nullable = false)
     @NotNull
-    private Long groupId;
+    private long groupId;
 
     @Column(name = "category_id", nullable = false)
     @NotNull
-    private Long categoryId;
+    private long categoryId;
 }
