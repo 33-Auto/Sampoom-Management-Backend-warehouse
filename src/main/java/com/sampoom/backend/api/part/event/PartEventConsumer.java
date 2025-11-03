@@ -62,7 +62,7 @@ public class PartEventConsumer {
             }
 
         } catch (Exception e) {
-            log.error("❌ Failed to process part event" + message);
+            log.error("❌ Failed to process part event: {}", message, e);
             throw new RuntimeException("Kafka message processing failed", e);
         }
     }
