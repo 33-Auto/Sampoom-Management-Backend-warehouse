@@ -24,8 +24,8 @@ public class Branch extends BaseTimeEntity {
     @Column(unique = true, nullable = false)
     private String address;      // 주소
 
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
 
     @Column(nullable = false)
     @Builder.Default
