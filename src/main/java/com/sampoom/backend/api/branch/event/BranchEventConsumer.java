@@ -1,13 +1,13 @@
-package com.sampoom.backend.api.event.service;
+package com.sampoom.backend.api.branch.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sampoom.backend.api.branch.dto.BranchPayload;
+import com.sampoom.backend.api.branch.dto.DistancePayload;
+import com.sampoom.backend.api.branch.service.BranchService;
+import com.sampoom.backend.api.branch.service.DistanceService;
 import com.sampoom.backend.api.part.dto.Event;
-import com.sampoom.backend.api.part.dto.PartCategoryPayload;
-import com.sampoom.backend.api.part.dto.PartGroupPayload;
-import com.sampoom.backend.api.part.dto.PartPayload;
 import com.sampoom.backend.api.part.event.EventPayloadMapper;
-import com.sampoom.backend.api.part.service.PartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,10 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class BranchEventConsumer {
     private final ObjectMapper objectMapper;
     private final EventPayloadMapper eventPayloadMapper;
-    private final PartService partService;
+    private final BranchService branchService;
+    private final DistanceService distanceService;
 
     @Transactional
-    @KafkaListener(topics = {"branch-events"})
+    @KafkaListener(topics = {"branch-events", "branch-distance-events"})
     public void consume(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
@@ -34,27 +35,15 @@ public class BranchEventConsumer {
                     objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
             );
 
-            if ("PartCreated".equals(eventType)) {
-                PartPayload payload = (PartPayload) event.getPayload();
-                partService.createPart(payload);
-                log.info("✅ partCreated saved: {}", payload.getName());
+            if ("BranchCreated".equals(eventType)) {
+                BranchPayload payload = (BranchPayload) event.getPayload();
+                branchService.createBranch(payload);
+                log.info("✅ partCreated saved: {}", payload.getBranchName());
             }
-            else if ("PartUpdated".equals(eventType)) {
-                PartPayload payload = (PartPayload) event.getPayload();
-                partService.updatePart(payload);
-                log.info("✅ partUpdated saved: {}", payload.getName());
-
+            else if ("DistanceCalculated".equals(eventType)) {
+                DistancePayload payload = (DistancePayload) event.getPayload();
+                distanceService.createDistance(payload);
             }
-            else if ("PartGroupCreated".equals(eventType)) {
-                PartGroupPayload payload = (PartGroupPayload) event.getPayload();
-                partService.createPartGroup(payload);
-                log.info("✅ partGroupCreated saved: {}", payload.getGroupName());
-            } else if ("PartCategoryCreated".equals(eventType)) {
-                PartCategoryPayload payload = (PartCategoryPayload) event.getPayload();
-                partService.createPartCategory(payload);
-                log.info("✅ PartCategoryCreated saved: {}", payload.getCategoryName());
-            }
-
         } catch (Exception e) {
             log.error("❌ Failed to process part event" + message);
             throw new RuntimeException("Kafka message processing failed", e);

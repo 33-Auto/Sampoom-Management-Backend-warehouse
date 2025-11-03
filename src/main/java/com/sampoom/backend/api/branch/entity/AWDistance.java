@@ -1,11 +1,13 @@
 package com.sampoom.backend.api.branch.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
-@Entity(name = "aw_distance")
+@Entity
+@Table(
+        name = "aw_distance",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"agencyId", "warehouseId"})
+)
 @Getter
 @Setter
 @Builder
@@ -22,5 +24,12 @@ public class AWDistance {
     private Long agencyId;
 
     @Column(nullable = false)
-    private Long distance;
+    private Double distance;
+
+    @Column(name = "travel_time")
+    private Double travelTime;
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private boolean isDeleted = false;
 }
