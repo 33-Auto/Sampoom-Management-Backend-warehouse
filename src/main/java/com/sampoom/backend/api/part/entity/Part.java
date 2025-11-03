@@ -33,7 +33,7 @@ public class Part extends BaseTimeEntity {
     private int leadTime;
 
     @Column(nullable = false)
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     @Column(name = "safety_stock", nullable = false)
     private int safetyStock;
