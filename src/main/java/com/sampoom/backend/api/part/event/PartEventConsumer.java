@@ -45,6 +45,12 @@ public class PartEventConsumer {
                 partService.createPart(payload);
                 log.info("✅ partCreated saved: {}", payload.getName());
             }
+            else if ("PartUpdated".equals(eventType)) {
+                PartPayload payload = (PartPayload) event.getPayload();
+                partService.updatePart(payload);
+                log.info("✅ partUpdated saved: {}", payload.getName());
+
+            }
             else if ("PartGroupCreated".equals(eventType)) {
                 PartGroupPayload payload = (PartGroupPayload) event.getPayload();
                 partService.createPartGroup(payload);
@@ -56,7 +62,7 @@ public class PartEventConsumer {
             }
 
         } catch (Exception e) {
-            log.error("❌ Failed to process part event", e);
+            log.error("❌ Failed to process part event: {}", message, e);
             throw new RuntimeException("Kafka message processing failed", e);
         }
     }

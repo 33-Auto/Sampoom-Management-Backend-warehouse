@@ -1,5 +1,7 @@
 package com.sampoom.backend.api.part.event;
 
+import com.sampoom.backend.api.branch.dto.BranchPayload;
+import com.sampoom.backend.api.branch.dto.DistancePayload;
 import com.sampoom.backend.api.part.dto.PartCategoryPayload;
 import com.sampoom.backend.api.part.dto.PartGroupPayload;
 import com.sampoom.backend.api.part.dto.PartPayload;
@@ -17,7 +19,10 @@ public class EventPayloadMapper {
         registry.put("PartCategoryCreated", PartCategoryPayload.class);
         registry.put("PartGroupCreated", PartGroupPayload.class);
         registry.put("PartCreated", PartPayload.class);
-        // 계속 추가
+        registry.put("PartUpdated", PartPayload.class);
+
+        registry.put("BranchCreated", BranchPayload.class);
+        registry.put("DistanceCalculated", DistancePayload.class);
     }
 
     public Class<?> getPayloadClass(String eventType) {

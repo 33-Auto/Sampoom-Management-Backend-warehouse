@@ -65,7 +65,7 @@ public class OrderService {
 
         AWDistance bestWarehouse = awDistances.stream()
                 .max(Comparator.comparingDouble((AWDistance aw) -> scoreMap.get(aw.getWarehouseId())) // 점수 높은 순
-                        .thenComparingLong(AWDistance::getDistance)) // 같으면 거리 잛은 순
+                        .thenComparing(AWDistance::getDistance, Comparator.reverseOrder())) // 같으면 거리 짧은 순
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.WAREHOUSE_NOT_FOUND.getMessage()));
 
         System.out.println("✅ 최적 창고 ID: " + bestWarehouse.getWarehouseId() +
