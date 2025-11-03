@@ -25,7 +25,6 @@ public class DistanceService {
                 .warehouseId(payload.getBranchId())
                 .distance(payload.getDistanceKm())
                 .travelTime(payload.getTravelTime())
-                .isDeleted(payload.getDeleted())
                 .build();
         distanceRepository.save(awDistance);
     }
