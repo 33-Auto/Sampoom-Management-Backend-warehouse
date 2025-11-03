@@ -9,6 +9,8 @@ import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.common.exception.NotFoundException;
+import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,10 +55,31 @@ public class PartService {
                 .code(payload.getCode())
                 .isDeleted(payload.getDeleted())
                 .status(payload.getStatus())
+                .leadTime(payload.getLeadTime())
                 .unit(payload.getPartUnit())
                 .safetyStock(payload.getBaseQuantity())
+                .standardCost(payload.getStandardCost())
                 .build();
 
+        partRepository.save(part);
+    }
+
+    @Transactional
+    public void updatePart(PartPayload payload) {
+        Part part = partRepository.findById(payload.getPartId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage())
+        );
+
+        part.setCode(payload.getCode());
+        part.setName(payload.getName());
+        part.setUnit(payload.getPartUnit());
+        part.setSafetyStock(payload.getBaseQuantity());
+        part.setLeadTime(payload.getLeadTime());
+        part.setStandardCost(payload.getStandardCost());
+        part.setStatus(payload.getStatus());
+        part.setIsDeleted(payload.getDeleted());
+        part.setGroupId(payload.getGroupId());
+        part.setCategoryId(payload.getCategoryId());
         partRepository.save(part);
     }
 }

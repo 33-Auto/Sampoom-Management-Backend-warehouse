@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.event.entity;
 
-import com.sampoom.backend.api.branch.event.BranchEvent;
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.sampoom.backend.api.part.event;
+package com.sampoom.backend.api.event.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,16 +6,10 @@ import com.sampoom.backend.api.part.dto.Event;
 import com.sampoom.backend.api.part.dto.PartCategoryPayload;
 import com.sampoom.backend.api.part.dto.PartGroupPayload;
 import com.sampoom.backend.api.part.dto.PartPayload;
-import com.sampoom.backend.api.part.entity.Category;
-import com.sampoom.backend.api.part.entity.Part;
-import com.sampoom.backend.api.part.entity.PartGroup;
-import com.sampoom.backend.api.part.repository.CategoryRepository;
-import com.sampoom.backend.api.part.repository.PartGroupRepository;
-import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.api.part.event.EventPayloadMapper;
 import com.sampoom.backend.api.part.service.PartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.codec.multipart.PartEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PartEventConsumer {
+public class BranchEventConsumer {
     private final ObjectMapper objectMapper;
     private final EventPayloadMapper eventPayloadMapper;
     private final PartService partService;
 
     @Transactional
-    @KafkaListener(topics = {"part-events", "part-group-events", "part-category-events"})
+    @KafkaListener(topics = {"branch-events"})
     public void consume(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
