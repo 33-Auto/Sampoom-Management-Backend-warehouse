@@ -6,7 +6,7 @@ import lombok.*;
 @Entity
 @Table(
         name = "aw_distance",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"agencyId", "warehouseId"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"agency_id", "warehouse_id"})
 )
 @Getter
 @Setter
@@ -17,10 +17,10 @@ public class AWDistance {
     @Id
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "warehouse_id", nullable = false)
     private Long warehouseId;
 
-    @Column(nullable = false)
+    @Column(name = "agency_id", nullable = false)
     private Long agencyId;
 
     @Column(nullable = false)
