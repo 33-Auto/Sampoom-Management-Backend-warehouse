@@ -21,7 +21,7 @@ public enum ErrorStatus {
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "잘못된 주문 상태입니다."),
     INVALID_QUANTITY_STATUS(HttpStatus.BAD_REQUEST, "잘못된 재고 수량 상태입니다."),
     DISTANCE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "이미 존재하는 대리점+창고 조합입니다"),
-
+    REQUEST_HAS_NULL(HttpStatus.BAD_REQUEST, "요청에 null이 존재합니다."),
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),

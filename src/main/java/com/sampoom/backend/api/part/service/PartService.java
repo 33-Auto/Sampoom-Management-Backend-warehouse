@@ -9,6 +9,7 @@ import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,10 @@ public class PartService {
 
     @Transactional
     public void createPartCategory(PartCategoryPayload payload) {
+        this.isNull(payload.getCategoryId());
+        this.isNull(payload.getCategoryName());
+        this.isNull(payload.getCategoryCode());
+
         Category category = Category.builder()
                 .id(payload.getCategoryId())
                 .name(payload.getCategoryName())
@@ -35,6 +40,11 @@ public class PartService {
 
     @Transactional
     public void createPartGroup(PartGroupPayload payload) {
+        this.isNull(payload.getCategoryId());
+        this.isNull(payload.getGroupId());
+        this.isNull(payload.getGroupName());
+        this.isNull(payload.getGroupCode());
+
         PartGroup group = PartGroup.builder()
                 .id(payload.getGroupId())
                 .categoryId(payload.getCategoryId())
@@ -47,6 +57,18 @@ public class PartService {
 
     @Transactional
     public void createPart(PartPayload payload) {
+        this.isNull(payload.getPartId());
+        this.isNull(payload.getCategoryId());
+        this.isNull(payload.getGroupId());
+        this.isNull(payload.getName());
+        this.isNull(payload.getCode());
+        this.isNull(payload.getDeleted());
+        this.isNull(payload.getStatus());
+        this.isNull(payload.getStandardCost());
+        this.isNull(payload.getPartUnit());
+        this.isNull(payload.getBaseQuantity());
+        this.isNull(payload.getLeadTime());
+
         Part part = Part.builder()
                 .id(payload.getPartId())
                 .groupId(payload.getGroupId())
@@ -81,5 +103,10 @@ public class PartService {
         part.setGroupId(payload.getGroupId());
         part.setCategoryId(payload.getCategoryId());
         partRepository.save(part);
+    }
+
+    private void isNull(Object object) {
+        if (object == null)
+            throw new BadRequestException(ErrorStatus.REQUEST_HAS_NULL.getMessage());
     }
 }
