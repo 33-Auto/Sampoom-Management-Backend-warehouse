@@ -3,6 +3,7 @@ package com.sampoom.backend.api.part.entity;
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import com.sampoom.backend.common.entitiy.Status;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -30,20 +31,26 @@ public class Part extends BaseTimeEntity {
     private String unit;
 
     @Column(name = "lead_time", nullable = false)
-    private int leadTime;
+    @NotNull
+    private Integer leadTime;
 
     @Column(nullable = false)
+    @NotNull
     private Boolean isDeleted;
 
     @Column(name = "safety_stock", nullable = false)
-    private int safetyStock;
+    @NotNull
+    private Integer safetyStock;
 
     @Column(name = "standard_cost", nullable = false)
-    private int standardCost;
+    @NotNull
+    private Integer standardCost;
 
     @Column(name = "group_id", nullable = false)
-    private long groupId;
+    @NotNull
+    private Long groupId;
 
     @Column(name = "category_id", nullable = false)
-    private long categoryId;
+    @NotNull
+    private Long categoryId;
 }
