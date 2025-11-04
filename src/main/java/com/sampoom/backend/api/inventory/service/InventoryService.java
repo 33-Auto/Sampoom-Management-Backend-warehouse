@@ -71,7 +71,7 @@ public class InventoryService {
 
     @Transactional
     public void updateParts(PartUpdateReqDto partUpdateReqDto) {
-        if (partUpdateReqDto.getItems().isEmpty()) {
+        if (partUpdateReqDto.getItems() == null || partUpdateReqDto.getItems().isEmpty()) {
             throw new BadRequestException(ErrorStatus.NO_UPDATE_PARTS_LIST.getMessage());
         }
         if (!branchRepository.existsById(partUpdateReqDto.getWarehouseId()))
