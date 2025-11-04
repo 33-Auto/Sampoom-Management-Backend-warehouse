@@ -111,11 +111,8 @@ public class InventoryService {
 
         List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
 
-        if (inventories.size() > partIds.size()) { // 재고를 못 찾는 경우
-            throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
-        } else if (inventories.size() < partIds.size()) { // 중복 부품이 들어온 경우
-            throw new BadRequestException(ErrorStatus.DUPLICATED_PART.getMessage());
-        }
+        if (inventories.size() < partIds.size()) // 재고를 못 찾거나 중복 부품
+            throw new BadRequestException(ErrorStatus.BAD_DELTA_REQUEST.getMessage());
 
         return inventories.stream()
                 .collect(Collectors.toMap(inv -> inv.getPart().getId(), inv -> inv));
