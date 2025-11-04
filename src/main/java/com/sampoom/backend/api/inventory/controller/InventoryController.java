@@ -2,8 +2,6 @@ package com.sampoom.backend.api.inventory.controller;
 
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.service.InventoryService;
-import com.sampoom.backend.api.order.dto.OrderStatus;
-import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
