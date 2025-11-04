@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.rop.dto;
 
+import com.sampoom.backend.api.inventory.dto.PartDeltaDto;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,5 +15,5 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderToFactoryDto {
     private String warehouseName;
-    List<ItemDto> items;
+    List<PartDeltaDto> items;
 }

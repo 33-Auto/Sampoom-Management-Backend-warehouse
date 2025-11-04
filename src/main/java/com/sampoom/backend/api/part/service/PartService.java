@@ -9,6 +9,9 @@ import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.common.exception.BadRequestException;
+import com.sampoom.backend.common.exception.NotFoundException;
+import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,10 @@ public class PartService {
 
     @Transactional
     public void createPartCategory(PartCategoryPayload payload) {
+        this.isNull(payload.getCategoryId());
+        this.isNull(payload.getCategoryName());
+        this.isNull(payload.getCategoryCode());
+
         Category category = Category.builder()
                 .id(payload.getCategoryId())
                 .name(payload.getCategoryName())
@@ -33,6 +40,11 @@ public class PartService {
 
     @Transactional
     public void createPartGroup(PartGroupPayload payload) {
+        this.isNull(payload.getCategoryId());
+        this.isNull(payload.getGroupId());
+        this.isNull(payload.getGroupName());
+        this.isNull(payload.getGroupCode());
+
         PartGroup group = PartGroup.builder()
                 .id(payload.getGroupId())
                 .categoryId(payload.getCategoryId())
@@ -45,6 +57,18 @@ public class PartService {
 
     @Transactional
     public void createPart(PartPayload payload) {
+        this.isNull(payload.getPartId());
+        this.isNull(payload.getCategoryId());
+        this.isNull(payload.getGroupId());
+        this.isNull(payload.getName());
+        this.isNull(payload.getCode());
+        this.isNull(payload.getDeleted());
+        this.isNull(payload.getStatus());
+        this.isNull(payload.getStandardCost());
+        this.isNull(payload.getPartUnit());
+        this.isNull(payload.getBaseQuantity());
+        this.isNull(payload.getLeadTime());
+
         Part part = Part.builder()
                 .id(payload.getPartId())
                 .groupId(payload.getGroupId())
@@ -53,10 +77,36 @@ public class PartService {
                 .code(payload.getCode())
                 .isDeleted(payload.getDeleted())
                 .status(payload.getStatus())
+                .leadTime(payload.getLeadTime())
                 .unit(payload.getPartUnit())
                 .safetyStock(payload.getBaseQuantity())
+                .standardCost(payload.getStandardCost())
                 .build();
 
         partRepository.save(part);
+    }
+
+    @Transactional
+    public void updatePart(PartPayload payload) {
+        Part part = partRepository.findById(payload.getPartId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage())
+        );
+
+        part.setCode(payload.getCode());
+        part.setName(payload.getName());
+        part.setUnit(payload.getPartUnit());
+        part.setSafetyStock(payload.getBaseQuantity());
+        part.setLeadTime(payload.getLeadTime());
+        part.setStandardCost(payload.getStandardCost());
+        part.setStatus(payload.getStatus());
+        part.setIsDeleted(payload.getDeleted());
+        part.setGroupId(payload.getGroupId());
+        part.setCategoryId(payload.getCategoryId());
+        partRepository.save(part);
+    }
+
+    private void isNull(Object object) {
+        if (object == null)
+            throw new BadRequestException(ErrorStatus.REQUEST_HAS_NULL.getMessage());
     }
 }

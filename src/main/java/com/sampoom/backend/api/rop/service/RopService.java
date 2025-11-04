@@ -9,6 +9,7 @@ import com.sampoom.backend.api.rop.dto.UpdateRopReqDto;
 import com.sampoom.backend.api.rop.entity.Rop;
 import com.sampoom.backend.common.entitiy.Status;
 import com.sampoom.backend.api.rop.repository.RopRepository;
+import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,9 @@ public class RopService {
         List<Inventory> inventories = inventoryRepository.findWithPartByBranchId(warehouseId);
         List<Rop> rops = inventories.stream()
                 .map(i -> {
+                    if (ropRepository.existsByInventory_Id(i.getId()))
+                        throw new BadRequestException(ErrorStatus.ROP_ALREADY_EXIST.getMessage() + i.getPart().getName());
+
                     int ropValue = i.getAverageDaily() * i.getLeadTime() + i.getPart().getSafetyStock();
                     return Rop.builder()
                             .inventory(i)

@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.event.entity;
 
-import com.sampoom.backend.api.branch.event.BranchEvent;
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,7 +23,7 @@ public class EventOutbox extends BaseTimeEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
-    private Object payload; // DB에 JSONB로 저장
+    private String payload; // DB에 JSONB로 저장
 
     @Column(nullable = false)
     @Builder.Default

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface AWDistanceRepository extends JpaRepository<AWDistance, Long> {
     List<AWDistance> findByAgencyId(Long agencyId);
+
+    boolean existsByAgencyIdAndWarehouseId(Long agencyId, Long warehouseId);
 }

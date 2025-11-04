@@ -17,4 +17,5 @@ public class PartPayload {
     private Boolean deleted;
     private Long groupId;
     private Long categoryId;
+    private Integer standardCost;
 }
