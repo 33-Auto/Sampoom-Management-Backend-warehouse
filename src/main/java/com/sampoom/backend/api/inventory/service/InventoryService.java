@@ -1,5 +1,7 @@
 package com.sampoom.backend.api.inventory.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.event.entity.EventOutbox;
 import com.sampoom.backend.api.event.entity.EventStatus;
@@ -41,6 +43,7 @@ public class InventoryService {
     private final RopRepository ropRepository;
     private final EventOutboxRepository eventOutboxRepository;
     private final BranchRepository branchRepository;
+    private final ObjectMapper objectMapper;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -64,27 +67,25 @@ public class InventoryService {
         return partGroupRepository.findAllByCategoryId(categoryId);
     }
 
-    public List<PartResDto> findParts(Long branchId, Long categoryId, Long groupId) {
-        return inventoryRepository.findParts(branchId, categoryId, groupId);
-    }
-
     @Transactional
-    public void updateParts(Long warehouseId, List<UpdatePartReqDto> updatePartReqDtos) {
-        if (updatePartReqDtos == null || updatePartReqDtos.isEmpty()) {
+    public void updateParts(PartUpdateReqDto partUpdateReqDto) {
+        if (partUpdateReqDto.getItems().isEmpty()) {
             throw new BadRequestException(ErrorStatus.NO_UPDATE_PARTS_LIST.getMessage());
         }
+        if (!branchRepository.existsById(partUpdateReqDto.getWarehouseId()))
+            throw new NotFoundException(ErrorStatus.BRANCH_NOT_FOUND.getMessage());
 
         // 중복 ID 체크
         Set<Long> uniqueIds = new HashSet<>();
-        for (UpdatePartReqDto dto : updatePartReqDtos) {
+        for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
             if (!uniqueIds.add(dto.getId())) {
                 throw new BadRequestException(ErrorStatus.DUPLICATED_PART.getMessage() + " partId: " + dto.getId());
             }
         }
 
         // 현재 수량 조회 & 미만 예외 확인
-        for (UpdatePartReqDto dto : updatePartReqDtos) {
-            Inventory inv = inventoryRepository.findByBranch_IdAndPart_Id(warehouseId, dto.getId())
+        for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
+            Inventory inv = inventoryRepository.findByBranch_IdAndPart_Id(partUpdateReqDto.getWarehouseId(), dto.getId())
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
 
             if (inv.getQuantity() + dto.getDelta() < 0) {
@@ -95,7 +96,7 @@ public class InventoryService {
         StringBuilder values = new StringBuilder();
         Map<String, Object> params = new HashMap<>();
         int idx = 0;
-        for (UpdatePartReqDto dto : updatePartReqDtos) {
+        for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
             if (idx > 0) values.append(", ");
             String pid = "pid" + idx;
             String delta = "delta" + idx;
@@ -110,15 +111,16 @@ public class InventoryService {
                 "WHERE i.part_id = t.part_id AND i.branch_id = :branchId";
 
         Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("branchId", warehouseId);
+        query.setParameter("branchId", partUpdateReqDto.getWarehouseId());
         params.forEach(query::setParameter);
 
         query.executeUpdate();
     }
 
     @Transactional
-    public void checkRop(Long warehouseId, List<UpdatePartReqDto> updatePartReqDtos) {
-        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, updatePartReqDtos.stream().map(UpdatePartReqDto::getId).collect(Collectors.toList()));
+    public void checkRop(PartUpdateReqDto partUpdateReqDto) {
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(partUpdateReqDto.getWarehouseId(),
+                partUpdateReqDto.getItems().stream().map(PartDeltaDto::getId).collect(Collectors.toList()));
         List<ItemDto> lackItems = new ArrayList<>();
         String warehouseName = inventories.get(0).getBranch().getName();
 
@@ -136,13 +138,19 @@ public class InventoryService {
         }
 
         // 주문서 발행
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(OrderToFactoryDto.builder()
+                    .warehouseName(warehouseName)
+                    .items(lackItems)
+                    .build());
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
+        }
+
         EventOutbox eventOutbox = EventOutbox.builder()
                 .topic("order-to-factory-events")
-                .payload(OrderToFactoryDto.builder()
-                        .warehouseName(warehouseName)
-                        .items(lackItems)
-                        .build()
-                )
+                .payload(json)
                 .status(EventStatus.PENDING)
                 .build();
         eventOutboxRepository.save(eventOutbox);
@@ -184,7 +192,7 @@ public class InventoryService {
                 .status(inv.getQuantityStatus())
                 .rop(rop.getRop())
                 .unit(inv.getPart().getUnit())
-                //.partValue(inv.getPart().getPartValue())
+                .partValue(inv.getPart().getStandardCost())
                 .build();
     }
 }

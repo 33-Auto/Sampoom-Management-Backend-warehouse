@@ -64,19 +64,17 @@ public class InventoryController {
         return ApiResponse.success(SuccessStatus.OK, parts);
     }
 
-//    @GetMapping("/{warehouseId}/all")
-//    public ResponseEntity<ApiResponse<List<PartResDto>>> getParts(
-//            @PathVariable Long warehouseId,
-//            @RequestParam(required = false) Long categoryId,
-//            @RequestParam(required = false) Long groupId
-//    ) {
-//        return ApiResponse.success(SuccessStatus.OK, inventoryService.findParts(warehouseId, categoryId, groupId));
-//    }
+    // 출고
+    @PatchMapping("/delivery")
+    public ResponseEntity<ApiResponse<Void>> deliveryParts(@RequestBody PartUpdateReqDto partUpdateReqDto) {
+       inventoryService.updateParts(partUpdateReqDto);
+       inventoryService.checkRop(partUpdateReqDto);
+       return ApiResponse.success_only(SuccessStatus.OK);
+    }
 
-    @PatchMapping("/{warehouseId}")
-    public ResponseEntity<ApiResponse<Void>> updateParts(@PathVariable Long warehouseId, @RequestBody List<UpdatePartReqDto> parts) {
-        inventoryService.updateParts(warehouseId, parts);
-        inventoryService.checkRop(warehouseId, parts);
+    @PatchMapping("/stocking")
+    public ResponseEntity<ApiResponse<Void>> stockingParts(@RequestBody PartUpdateReqDto partUpdateReqDto) {
+        inventoryService.updateParts(partUpdateReqDto);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 

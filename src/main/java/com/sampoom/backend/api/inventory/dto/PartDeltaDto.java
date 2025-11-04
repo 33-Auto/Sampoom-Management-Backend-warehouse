@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePartReqDto {
+public class PartDeltaDto {
     @NotNull
     private Long id;
     @NotNull

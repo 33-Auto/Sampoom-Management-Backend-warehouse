@@ -1,5 +1,7 @@
 package com.sampoom.backend.api.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.entity.AWDistance;
 import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.branch.repository.AWDistanceRepository;
@@ -9,6 +11,7 @@ import com.sampoom.backend.api.event.entity.EventStatus;
 import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.*;
+import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ public class OrderService {
     private final EventOutboxRepository eventOutboxRepository;
     private final AWDistanceRepository distanceRepository;
     private final BranchRepository branchRepository;
+    private final ObjectMapper objectMapper;
 
     public void orderProcess(OrderReqDto orderReqDto) {
         // 창고 배정
@@ -34,13 +38,6 @@ public class OrderService {
 
         // 배정되면 주문 확인 발송 // 전국 품절이면 생산 중 발송
         setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.CONFIRMED);
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.PRODUCING);
-        // 배송 중 발송
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.SHIPPING);
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.DELAYED);
-
-        // 배송 완료 발송
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.COMPLETED);
     }
 
     private Branch allocateWarehouse(OrderReqDto orderReqDto) {
@@ -78,25 +75,43 @@ public class OrderService {
     }
 
     private void setOrderWarehouseEvent(Long orderId, Branch allocatedBranch) {
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(OrderWarehouseEvent.builder()
+                    .orderId(orderId)
+                    .warehouseId(allocatedBranch.getId())
+                    .warehouseName(allocatedBranch.getName())
+                    .build()
+            );
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
+        }
+
         EventOutbox eventOutbox = EventOutbox.builder()
                 .topic("order-warehouse-events")
-                .payload(OrderWarehouseEvent.builder()
-                        .orderId(orderId)
-                        .warehouseId(allocatedBranch.getId())
-                        .warehouseName(allocatedBranch.getName())
-                        .build())
+                .payload(json)
                 .status(EventStatus.PENDING)
                 .build();
         eventOutboxRepository.save(eventOutbox);
     }
 
     private void setOrderStatusEvent(Long orderId, OrderStatus orderStatus) {
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(OrderStatusEvent.builder()
+                    .orderId(orderId)
+                    .orderStatus(orderStatus)
+                    .build()
+            );
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
+        }
+
         EventOutbox eventOutbox = EventOutbox.builder()
                 .topic("order-status-events")
                 .status(EventStatus.PENDING)
-                .payload(OrderStatusEvent.builder().orderId(orderId).orderStatus(orderStatus).build())
+                .payload(json)
                 .build();
         eventOutboxRepository.save(eventOutbox);
     }
-
 }
