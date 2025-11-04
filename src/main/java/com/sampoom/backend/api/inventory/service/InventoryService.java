@@ -12,6 +12,8 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
+import com.sampoom.backend.api.order.dto.OrderStatus;
+import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
@@ -42,10 +44,9 @@ public class InventoryService {
     private final CategoryRepository categoryRepository;
     private final PartGroupRepository partGroupRepository;
     private final RopRepository ropRepository;
-    private final EventOutboxRepository eventOutboxRepository;
     private final EventService eventService;
     private final BranchRepository branchRepository;
-    private final ObjectMapper objectMapper;
+    private final OrderService orderService;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -120,9 +121,9 @@ public class InventoryService {
     }
 
     @Transactional
-    public void checkRop(PartUpdateReqDto partUpdateReqDto) {
-        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(partUpdateReqDto.getWarehouseId(),
-                partUpdateReqDto.getItems().stream().map(PartDeltaDto::getId).collect(Collectors.toList()));
+    public void checkRop(DeliveryReqDto deliveryReqDto) {
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(deliveryReqDto.getWarehouseId(),
+                deliveryReqDto.getItems().stream().map(PartDeltaDto::getId).collect(Collectors.toList()));
         if (inventories.isEmpty())
             throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
 
@@ -149,6 +150,7 @@ public class InventoryService {
                     .items(lackItems)
                     .build());
             eventService.setEventOutBox("order-to-factory-events", json);
+            orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.SHIPPING);
         }
     }
 

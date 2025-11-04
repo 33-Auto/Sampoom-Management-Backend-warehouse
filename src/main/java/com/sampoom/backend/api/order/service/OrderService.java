@@ -84,7 +84,7 @@ public class OrderService {
         eventService.setEventOutBox("order-warehouse-events", json);
     }
 
-    private void setOrderStatusEvent(Long orderId, OrderStatus orderStatus) {
+    public void setOrderStatusEvent(Long orderId, OrderStatus orderStatus) {
         String json = eventService.serializePayload(OrderStatusEvent.builder()
                 .orderId(orderId)
                 .orderStatus(orderStatus)

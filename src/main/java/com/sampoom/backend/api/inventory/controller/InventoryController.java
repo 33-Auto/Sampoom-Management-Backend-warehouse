@@ -67,9 +67,9 @@ public class InventoryController {
 
     // 출고
     @PatchMapping("/delivery")
-    public ResponseEntity<ApiResponse<Void>> deliveryParts(@Valid @RequestBody PartUpdateReqDto partUpdateReqDto) {
-       inventoryService.updateParts(partUpdateReqDto);
-       inventoryService.checkRop(partUpdateReqDto);
+    public ResponseEntity<ApiResponse<Void>> deliveryParts(@Valid @RequestBody DeliveryReqDto deliveryReqDto) {
+       inventoryService.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()));
+       inventoryService.checkRop(deliveryReqDto);
        return ApiResponse.success_only(SuccessStatus.OK);
     }
 
