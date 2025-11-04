@@ -9,7 +9,9 @@ import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.entity.Inventory;
+import com.sampoom.backend.api.inventory.entity.OutHistory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
+import com.sampoom.backend.api.inventory.repository.OutHistoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.OrderStatus;
@@ -47,7 +49,7 @@ public class InventoryService {
     private final RopRepository ropRepository;
     private final EventService eventService;
     private final BranchRepository branchRepository;
-    private final OrderService orderService;
+    private final OutHistoryRepository outHistoryRepository;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -74,6 +76,7 @@ public class InventoryService {
     @Transactional
     public void deliveryProcess(DeliveryReqDto deliveryReqDto) {
         this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()));
+        this.saveOutHistory(deliveryReqDto);
         this.checkRop(deliveryReqDto);
         //orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
     }
@@ -124,6 +127,41 @@ public class InventoryService {
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("branchId", partUpdateReqDto.getWarehouseId());
         params.forEach(query::setParameter);
+
+        query.executeUpdate();
+    }
+
+    @Transactional
+    protected void saveOutHistory(DeliveryReqDto deliveryReqDto) {
+        Long warehouseId = deliveryReqDto.getWarehouseId();
+        List<Object[]> updateList = new ArrayList<>();
+
+        for (PartDeltaDto dto : deliveryReqDto.getItems()) {
+            Inventory inventory = inventoryRepository
+                    .findByBranch_IdAndPart_Id(warehouseId, dto.getId())
+                    .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
+
+            updateList.add(new Object[] {inventory.getId(), Math.abs(dto.getDelta())});
+        }
+
+        if (updateList.isEmpty()) return ;
+
+        StringBuilder sql = new StringBuilder(
+                "INSERT INTO out_history (inventory_id, used_quantity, created_at) VALUES "
+        );
+
+        for (int i = 0; i < updateList.size(); i++) {
+            if (i > 0) sql.append(", ");
+            sql.append("(?, ?, now())");
+        }
+
+        Query query = entityManager.createNativeQuery(sql.toString());
+
+        int idx = 1;
+        for (Object[] row : updateList) {
+            query.setParameter(idx++, row[0]); // inventory_id
+            query.setParameter(idx++, row[1]); // used_quantity
+        }
 
         query.executeUpdate();
     }
