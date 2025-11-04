@@ -121,7 +121,7 @@ public class InventoryService {
     public void checkRop(PartUpdateReqDto partUpdateReqDto) {
         List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(partUpdateReqDto.getWarehouseId(),
                 partUpdateReqDto.getItems().stream().map(PartDeltaDto::getId).collect(Collectors.toList()));
-        List<ItemDto> lackItems = new ArrayList<>();
+        List<PartDeltaDto> lackItems = new ArrayList<>();
         String warehouseName = inventories.get(0).getBranch().getName();
 
         // 재고 없는 것들 수집
@@ -130,30 +130,32 @@ public class InventoryService {
                     .orElseThrow(() -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage()));
 
             if (inventory.getQuantity() <= rop.getRop()) {
-                lackItems.add(ItemDto.builder()
-                        .code(inventory.getPart().getCode())
-                        .quantity(inventory.getMaxStock() - inventory.getQuantity())
+                lackItems.add(PartDeltaDto.builder()
+                        .id(inventory.getPart().getId())
+                        .delta(inventory.getMaxStock() - inventory.getQuantity())
                         .build());
             }
         }
 
         // 주문서 발행
-        String json;
-        try {
-            json = objectMapper.writeValueAsString(OrderToFactoryDto.builder()
-                    .warehouseName(warehouseName)
-                    .items(lackItems)
-                    .build());
-        } catch (JsonProcessingException e) {
-            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
-        }
+        if (!lackItems.isEmpty()) {
+            String json;
+            try {
+                json = objectMapper.writeValueAsString(OrderToFactoryDto.builder()
+                        .warehouseName(warehouseName)
+                        .items(lackItems)
+                        .build());
+            } catch (JsonProcessingException e) {
+                throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
+            }
 
-        EventOutbox eventOutbox = EventOutbox.builder()
-                .topic("order-to-factory-events")
-                .payload(json)
-                .status(EventStatus.PENDING)
-                .build();
-        eventOutboxRepository.save(eventOutbox);
+            EventOutbox eventOutbox = EventOutbox.builder()
+                    .topic("order-to-factory-events")
+                    .payload(json)
+                    .status(EventStatus.PENDING)
+                    .build();
+            eventOutboxRepository.save(eventOutbox);
+        }
     }
 
     public boolean isStockAvailable(OrderReqDto orderReqDto) {
