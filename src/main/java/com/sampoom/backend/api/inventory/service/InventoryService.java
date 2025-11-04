@@ -32,6 +32,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -74,7 +75,7 @@ public class InventoryService {
     public void deliveryProcess(DeliveryReqDto deliveryReqDto) {
         this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()));
         this.checkRop(deliveryReqDto);
-        orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.SHIPPING);
+        orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
     }
 
     @Transactional
