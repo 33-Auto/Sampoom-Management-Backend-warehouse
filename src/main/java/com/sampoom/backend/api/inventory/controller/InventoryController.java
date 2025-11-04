@@ -2,9 +2,12 @@ package com.sampoom.backend.api.inventory.controller;
 
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.service.InventoryService;
+import com.sampoom.backend.api.order.dto.OrderStatus;
+import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,19 +67,16 @@ public class InventoryController {
         return ApiResponse.success(SuccessStatus.OK, parts);
     }
 
-//    @GetMapping("/{warehouseId}/all")
-//    public ResponseEntity<ApiResponse<List<PartResDto>>> getParts(
-//            @PathVariable Long warehouseId,
-//            @RequestParam(required = false) Long categoryId,
-//            @RequestParam(required = false) Long groupId
-//    ) {
-//        return ApiResponse.success(SuccessStatus.OK, inventoryService.findParts(warehouseId, categoryId, groupId));
-//    }
+    // 출고
+    @PatchMapping("/delivery")
+    public ResponseEntity<ApiResponse<Void>> deliveryParts(@Valid @RequestBody DeliveryReqDto deliveryReqDto) {
+        inventoryService.deliveryProcess(deliveryReqDto);
+       return ApiResponse.success_only(SuccessStatus.OK);
+    }
 
-    @PatchMapping("/{warehouseId}")
-    public ResponseEntity<ApiResponse<Void>> updateParts(@PathVariable Long warehouseId, @RequestBody List<UpdatePartReqDto> parts) {
-        inventoryService.updateParts(warehouseId, parts);
-        inventoryService.checkRop(warehouseId, parts);
+    @PatchMapping("/stocking")
+    public ResponseEntity<ApiResponse<Void>> stockingParts(@Valid @RequestBody PartUpdateReqDto partUpdateReqDto) {
+        inventoryService.updateParts(partUpdateReqDto);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 

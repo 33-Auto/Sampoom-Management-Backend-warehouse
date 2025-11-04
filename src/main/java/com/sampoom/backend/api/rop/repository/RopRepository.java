@@ -35,4 +35,6 @@ public interface RopRepository extends JpaRepository<Rop, Long> {
     List<Rop> findWithInventoryByInventory_Branch_IdAndAutoCalStatus(Long inventoryBranchId, Status autoCalStatus);
 
     Optional<Rop> findWithInventoryByInventory_IdAndAutoOrderStatusAndIsDeletedFalse(Long inventoryBranchId, Status autoOrderStatus);
+
+    boolean existsByInventory_Id(Long inventoryId);
 }

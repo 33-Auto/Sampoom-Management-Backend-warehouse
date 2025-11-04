@@ -18,7 +18,6 @@ import java.util.List;
 public class EventPublisher {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final EventOutboxRepository eventOutboxRepository;
-    private final ObjectMapper objectMapper;
 
     @Scheduled(fixedDelay = 5000)
     public void publishPendingEvents() {
@@ -28,7 +27,7 @@ public class EventPublisher {
 
         for (EventOutbox event : pendingEvents) {
             try {
-                kafkaTemplate.send(event.getTopic(), objectMapper.writeValueAsString(event.getPayload()))
+                kafkaTemplate.send(event.getTopic(), event.getPayload())
                         .thenAccept(result -> {
                             event.setStatus(EventStatus.PUBLISHED);
                             eventOutboxRepository.save(event);

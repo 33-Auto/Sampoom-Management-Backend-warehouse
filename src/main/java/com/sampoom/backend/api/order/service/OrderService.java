@@ -1,5 +1,7 @@
 package com.sampoom.backend.api.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.entity.AWDistance;
 import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.branch.repository.AWDistanceRepository;
@@ -7,8 +9,10 @@ import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.event.entity.EventOutbox;
 import com.sampoom.backend.api.event.entity.EventStatus;
 import com.sampoom.backend.api.event.repository.EventOutboxRepository;
+import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.*;
+import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +27,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OrderService {
     private final InventoryRepository inventoryRepository;
-    private final EventOutboxRepository eventOutboxRepository;
     private final AWDistanceRepository distanceRepository;
     private final BranchRepository branchRepository;
+    private final EventService eventService;
 
     public void orderProcess(OrderReqDto orderReqDto) {
         // 창고 배정
@@ -34,13 +38,6 @@ public class OrderService {
 
         // 배정되면 주문 확인 발송 // 전국 품절이면 생산 중 발송
         setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.CONFIRMED);
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.PRODUCING);
-        // 배송 중 발송
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.SHIPPING);
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.DELAYED);
-
-        // 배송 완료 발송
-        setOrderStatusEvent(orderReqDto.getOrderId(), OrderStatus.COMPLETED);
     }
 
     private Branch allocateWarehouse(OrderReqDto orderReqDto) {
@@ -78,25 +75,22 @@ public class OrderService {
     }
 
     private void setOrderWarehouseEvent(Long orderId, Branch allocatedBranch) {
-        EventOutbox eventOutbox = EventOutbox.builder()
-                .topic("order-warehouse-events")
-                .payload(OrderWarehouseEvent.builder()
-                        .orderId(orderId)
-                        .warehouseId(allocatedBranch.getId())
-                        .warehouseName(allocatedBranch.getName())
-                        .build())
-                .status(EventStatus.PENDING)
-                .build();
-        eventOutboxRepository.save(eventOutbox);
+        String json = eventService.serializePayload(OrderWarehouseEvent.builder()
+                .orderId(orderId)
+                .warehouseId(allocatedBranch.getId())
+                .warehouseName(allocatedBranch.getName())
+                .build()
+        );
+        eventService.setEventOutBox("order-warehouse-events", json);
     }
 
-    private void setOrderStatusEvent(Long orderId, OrderStatus orderStatus) {
-        EventOutbox eventOutbox = EventOutbox.builder()
-                .topic("order-status-events")
-                .status(EventStatus.PENDING)
-                .payload(OrderStatusEvent.builder().orderId(orderId).orderStatus(orderStatus).build())
-                .build();
-        eventOutboxRepository.save(eventOutbox);
+    public void setOrderStatusEvent(Long orderId, OrderStatus orderStatus) {
+        String json = eventService.serializePayload(OrderStatusEvent.builder()
+                .orderId(orderId)
+                .orderStatus(orderStatus)
+                .build()
+        );
+        eventService.setEventOutBox("order-status-events", json);
     }
 
 }
