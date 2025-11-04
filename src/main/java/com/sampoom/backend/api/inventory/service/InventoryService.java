@@ -75,7 +75,7 @@ public class InventoryService {
     public void deliveryProcess(DeliveryReqDto deliveryReqDto) {
         this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()));
         this.checkRop(deliveryReqDto);
-        orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
+        //orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
     }
 
     @Transactional

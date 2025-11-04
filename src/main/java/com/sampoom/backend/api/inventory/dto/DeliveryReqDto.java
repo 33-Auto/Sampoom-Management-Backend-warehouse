@@ -10,7 +10,6 @@ public class DeliveryReqDto {
     @NotNull(message = "창고 아이디는 필수입니다.")
     private Long warehouseId;
 
-    @NotNull(message = "주문 아이디는 필수입니다.")
     private Long orderId;
 
     private List<PartDeltaDto> items;
