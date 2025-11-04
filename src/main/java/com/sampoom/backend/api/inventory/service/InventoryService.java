@@ -6,6 +6,7 @@ import com.sampoom.backend.api.branch.repository.BranchRepository;
 import com.sampoom.backend.api.event.entity.EventOutbox;
 import com.sampoom.backend.api.event.entity.EventStatus;
 import com.sampoom.backend.api.event.repository.EventOutboxRepository;
+import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
@@ -42,6 +43,7 @@ public class InventoryService {
     private final PartGroupRepository partGroupRepository;
     private final RopRepository ropRepository;
     private final EventOutboxRepository eventOutboxRepository;
+    private final EventService eventService;
     private final BranchRepository branchRepository;
     private final ObjectMapper objectMapper;
     @PersistenceContext
@@ -139,22 +141,11 @@ public class InventoryService {
 
         // 주문서 발행
         if (!lackItems.isEmpty()) {
-            String json;
-            try {
-                json = objectMapper.writeValueAsString(OrderToFactoryDto.builder()
-                        .warehouseName(warehouseName)
-                        .items(lackItems)
-                        .build());
-            } catch (JsonProcessingException e) {
-                throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
-            }
-
-            EventOutbox eventOutbox = EventOutbox.builder()
-                    .topic("order-to-factory-events")
-                    .payload(json)
-                    .status(EventStatus.PENDING)
-                    .build();
-            eventOutboxRepository.save(eventOutbox);
+            String json = eventService.serializePayload(OrderToFactoryDto.builder()
+                    .warehouseName(warehouseName)
+                    .items(lackItems)
+                    .build());
+            eventService.setEventOutBox("order-to-factory-events", json);
         }
     }
 
