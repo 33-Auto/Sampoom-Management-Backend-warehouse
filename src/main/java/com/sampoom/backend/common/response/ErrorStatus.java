@@ -25,6 +25,9 @@ public enum ErrorStatus {
     ROP_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "재고에 rop가 이미 존재합니다"),
     FAIL_SERIALIZE(HttpStatus.BAD_REQUEST, "직렬화에 실패하였습니다."),
 
+    POSITIVE_DELTA(HttpStatus.BAD_REQUEST, "변화량이 양수입니다."),
+    NEGATIVE_DELTA(HttpStatus.BAD_REQUEST, "변화량이 음수입니다."),
+
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
 

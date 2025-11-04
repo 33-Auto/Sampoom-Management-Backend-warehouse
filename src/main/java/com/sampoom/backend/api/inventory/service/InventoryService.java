@@ -49,7 +49,6 @@ public class InventoryService {
     private final RopRepository ropRepository;
     private final EventService eventService;
     private final BranchRepository branchRepository;
-    private final OutHistoryRepository outHistoryRepository;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -79,12 +78,22 @@ public class InventoryService {
                 deliveryReqDto.getWarehouseId(),
                 deliveryReqDto.getItems()
         );
+        PartUpdateReqDto partUpdateReqDto = new PartUpdateReqDto(
+                deliveryReqDto.getWarehouseId(),
+                deliveryReqDto.getItems());
 
-        this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()),
-                         inventoryMap);
+        this.validateOutBound(partUpdateReqDto);
+        this.updateParts(partUpdateReqDto, inventoryMap);
         this.saveOutHistory(deliveryReqDto.getItems(), inventoryMap);
         this.checkRop(deliveryReqDto);
         //orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
+    }
+
+    private void validateOutBound(PartUpdateReqDto partUpdateReqDto) {
+        for (PartDeltaDto partDeltaDto : partUpdateReqDto.getItems()) {
+            if (partDeltaDto.getDelta() >= 0)
+                throw new BadRequestException(ErrorStatus.POSITIVE_DELTA.getMessage());
+        }
     }
 
     @Transactional
@@ -94,7 +103,15 @@ public class InventoryService {
                 partUpdateReqDto.getItems()
         );
 
+        this.validateInBound(partUpdateReqDto);
         this.updateParts(partUpdateReqDto, inventoryMap);
+    }
+
+    private void validateInBound(PartUpdateReqDto partUpdateReqDto) {
+        for (PartDeltaDto partDeltaDto : partUpdateReqDto.getItems()) {
+            if (partDeltaDto.getDelta() <= 0)
+                throw new BadRequestException(ErrorStatus.NEGATIVE_DELTA.getMessage());
+        }
     }
 
     private Map<Long, Inventory> getInventoryMap(Long warehouseId, List<PartDeltaDto> dtos) {
@@ -163,7 +180,7 @@ public class InventoryService {
     protected void saveOutHistory(List<PartDeltaDto> items, Map<Long, Inventory> inventoryMap) {
         List<Object[]> updateList = items.stream()
                 .map(item -> new Object[]{
-                        inventoryMap.get(item.getId()).getId(), item.getDelta()
+                        inventoryMap.get(item.getId()).getId(), Math.abs(item.getDelta())
                 })
                 .toList();
 
