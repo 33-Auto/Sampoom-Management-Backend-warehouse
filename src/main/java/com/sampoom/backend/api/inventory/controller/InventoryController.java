@@ -5,6 +5,7 @@ import com.sampoom.backend.api.inventory.service.InventoryService;
 import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,14 +67,14 @@ public class InventoryController {
 
     // 출고
     @PatchMapping("/delivery")
-    public ResponseEntity<ApiResponse<Void>> deliveryParts(@RequestBody PartUpdateReqDto partUpdateReqDto) {
+    public ResponseEntity<ApiResponse<Void>> deliveryParts(@Valid @RequestBody PartUpdateReqDto partUpdateReqDto) {
        inventoryService.updateParts(partUpdateReqDto);
        inventoryService.checkRop(partUpdateReqDto);
        return ApiResponse.success_only(SuccessStatus.OK);
     }
 
     @PatchMapping("/stocking")
-    public ResponseEntity<ApiResponse<Void>> stockingParts(@RequestBody PartUpdateReqDto partUpdateReqDto) {
+    public ResponseEntity<ApiResponse<Void>> stockingParts(@Valid @RequestBody PartUpdateReqDto partUpdateReqDto) {
         inventoryService.updateParts(partUpdateReqDto);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
