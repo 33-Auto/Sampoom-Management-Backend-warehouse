@@ -1,21 +1,12 @@
 package com.sampoom.backend.api.inventory.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
-import com.sampoom.backend.api.event.entity.EventOutbox;
-import com.sampoom.backend.api.event.entity.EventStatus;
-import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.entity.Inventory;
-import com.sampoom.backend.api.inventory.entity.OutHistory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
-import com.sampoom.backend.api.inventory.repository.OutHistoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
-import com.sampoom.backend.api.order.dto.OrderStatus;
-import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
@@ -33,8 +24,9 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -252,7 +244,8 @@ public class InventoryService {
         return true;
     }
 
-    public Page<PartResDto> searchInventory(SearchReqDto req, Pageable pageable) {
+    public Page<PartResDto> searchInventory(SearchReqDto req, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         return inventoryRepository.search(req, pageable)
                 .map(this::toResponse);
     }

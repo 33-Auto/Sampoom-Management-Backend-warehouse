@@ -53,7 +53,7 @@ public class InventoryQueryRepositoryImpl implements InventoryQueryRepository {
         List<Inventory> content = queryFactory
                 .select(inventory)
                 .from(inventory)
-                .join(inventory.part, part).fetchJoin()   // ⚡ N+1 방지
+                .join(inventory.part, part).fetchJoin()
                 .where(builder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
