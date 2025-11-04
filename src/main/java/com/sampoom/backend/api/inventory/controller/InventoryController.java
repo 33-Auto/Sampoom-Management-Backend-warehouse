@@ -2,15 +2,12 @@ package com.sampoom.backend.api.inventory.controller;
 
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.service.InventoryService;
-import com.sampoom.backend.api.order.dto.OrderStatus;
-import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,13 +73,26 @@ public class InventoryController {
 
     @PatchMapping("/stocking")
     public ResponseEntity<ApiResponse<Void>> stockingParts(@Valid @RequestBody PartUpdateReqDto partUpdateReqDto) {
-        inventoryService.updateParts(partUpdateReqDto);
+        inventoryService.stockingProcess(partUpdateReqDto);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<PartResDto>>> search(@ModelAttribute SearchReqDto req, Pageable pageable) {
-        return ApiResponse.success(SuccessStatus.OK, inventoryService.searchInventory(req, pageable));
+    public ResponseEntity<ApiResponse<Page<PartResDto>>> search(@RequestParam Long warehouseId,
+                                                                @RequestParam(required = false) Long categoryId,
+                                                                @RequestParam(required = false) Long groupId,
+                                                                @RequestParam(required = false) String keyword,
+                                                                @RequestParam(required = false) QuantityStatus quantityStatus,
+                                                                @RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "20") int size) {
+        SearchReqDto searchReqDto = SearchReqDto.builder()
+                .warehouseId(warehouseId)
+                .categoryId(categoryId)
+                .groupId(groupId)
+                .keyword(keyword)
+                .quantityStatus(quantityStatus)
+                .build();
+        return ApiResponse.success(SuccessStatus.OK, inventoryService.searchInventory(searchReqDto, page, size));
     }
 
 }

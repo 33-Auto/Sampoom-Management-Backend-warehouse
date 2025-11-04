@@ -1,19 +1,12 @@
 package com.sampoom.backend.api.inventory.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
-import com.sampoom.backend.api.event.entity.EventOutbox;
-import com.sampoom.backend.api.event.entity.EventStatus;
-import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
-import com.sampoom.backend.api.order.dto.OrderStatus;
-import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
@@ -31,8 +24,9 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -47,7 +41,6 @@ public class InventoryService {
     private final RopRepository ropRepository;
     private final EventService eventService;
     private final BranchRepository branchRepository;
-    private final OrderService orderService;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -73,33 +66,71 @@ public class InventoryService {
 
     @Transactional
     public void deliveryProcess(DeliveryReqDto deliveryReqDto) {
-        this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()));
+        Map<Long, Inventory> inventoryMap = this.getInventoryMap(
+                deliveryReqDto.getWarehouseId(),
+                deliveryReqDto.getItems()
+        );
+        PartUpdateReqDto partUpdateReqDto = new PartUpdateReqDto(
+                deliveryReqDto.getWarehouseId(),
+                deliveryReqDto.getItems());
+
+        this.validateOutBound(partUpdateReqDto);
+        this.updateParts(partUpdateReqDto, inventoryMap);
+        this.saveOutHistory(deliveryReqDto.getItems(), inventoryMap);
         this.checkRop(deliveryReqDto);
         //orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
     }
 
+    private void validateOutBound(PartUpdateReqDto partUpdateReqDto) {
+        for (PartDeltaDto partDeltaDto : partUpdateReqDto.getItems()) {
+            if (partDeltaDto.getDelta() >= 0)
+                throw new BadRequestException(ErrorStatus.POSITIVE_DELTA.getMessage());
+        }
+    }
+
     @Transactional
-    public void updateParts(PartUpdateReqDto partUpdateReqDto) {
+    public void stockingProcess(PartUpdateReqDto partUpdateReqDto) {
+        Map<Long, Inventory> inventoryMap = this.getInventoryMap(
+                partUpdateReqDto.getWarehouseId(),
+                partUpdateReqDto.getItems()
+        );
+
+        this.validateInBound(partUpdateReqDto);
+        this.updateParts(partUpdateReqDto, inventoryMap);
+    }
+
+    private void validateInBound(PartUpdateReqDto partUpdateReqDto) {
+        for (PartDeltaDto partDeltaDto : partUpdateReqDto.getItems()) {
+            if (partDeltaDto.getDelta() <= 0)
+                throw new BadRequestException(ErrorStatus.NEGATIVE_DELTA.getMessage());
+        }
+    }
+
+    private Map<Long, Inventory> getInventoryMap(Long warehouseId, List<PartDeltaDto> dtos) {
+        List<Long> partIds = dtos.stream().map(PartDeltaDto::getId).toList();
+
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
+
+        if (inventories.size() < partIds.size()) // 재고를 못 찾거나 중복 부품
+            throw new BadRequestException(ErrorStatus.BAD_DELTA_REQUEST.getMessage());
+
+        return inventories.stream()
+                .collect(Collectors.toMap(inv -> inv.getPart().getId(), inv -> inv));
+    }
+
+    @Transactional
+    public void updateParts(PartUpdateReqDto partUpdateReqDto, Map<Long, Inventory> inventoryMap) {
         if (partUpdateReqDto.getItems() == null || partUpdateReqDto.getItems().isEmpty()) {
             throw new BadRequestException(ErrorStatus.NO_UPDATE_PARTS_LIST.getMessage());
         }
         if (!branchRepository.existsById(partUpdateReqDto.getWarehouseId()))
             throw new NotFoundException(ErrorStatus.BRANCH_NOT_FOUND.getMessage());
 
-        // 중복 ID 체크
-        Set<Long> uniqueIds = new HashSet<>();
-        for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
-            if (!uniqueIds.add(dto.getId())) {
-                throw new BadRequestException(ErrorStatus.DUPLICATED_PART.getMessage() + " partId: " + dto.getId());
-            }
-        }
-
         // 현재 수량 조회 & 미만 예외 확인
         for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
-            Inventory inv = inventoryRepository.findByBranch_IdAndPart_Id(partUpdateReqDto.getWarehouseId(), dto.getId())
-                    .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
+            Inventory inventory = inventoryMap.get(dto.getId());
 
-            if (inv.getQuantity() + dto.getDelta() < 0) {
+            if (inventory.getQuantity() + dto.getDelta() < 0) {
                 throw new BadRequestException(ErrorStatus.INVALID_PART_QUANTITY.getMessage() + " partId: " + dto.getId());
             }
         }
@@ -124,6 +155,36 @@ public class InventoryService {
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("branchId", partUpdateReqDto.getWarehouseId());
         params.forEach(query::setParameter);
+
+        query.executeUpdate();
+    }
+
+    @Transactional
+    protected void saveOutHistory(List<PartDeltaDto> items, Map<Long, Inventory> inventoryMap) {
+        List<Object[]> updateList = items.stream()
+                .map(item -> new Object[]{
+                        inventoryMap.get(item.getId()).getId(), Math.abs(item.getDelta())
+                })
+                .toList();
+
+        if (updateList.isEmpty()) return ;
+
+        StringBuilder sql = new StringBuilder(
+                "INSERT INTO out_history (inventory_id, used_quantity, created_at) VALUES "
+        );
+
+        for (int i = 0; i < updateList.size(); i++) {
+            if (i > 0) sql.append(", ");
+            sql.append("(?, ?, now())");
+        }
+
+        Query query = entityManager.createNativeQuery(sql.toString());
+
+        int idx = 1;
+        for (Object[] row : updateList) {
+            query.setParameter(idx++, row[0]); // inventory_id
+            query.setParameter(idx++, row[1]); // used_quantity
+        }
 
         query.executeUpdate();
     }
@@ -174,7 +235,8 @@ public class InventoryService {
         return true;
     }
 
-    public Page<PartResDto> searchInventory(SearchReqDto req, Pageable pageable) {
+    public Page<PartResDto> searchInventory(SearchReqDto req, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         return inventoryRepository.search(req, pageable)
                 .map(this::toResponse);
     }
