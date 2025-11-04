@@ -123,6 +123,9 @@ public class InventoryService {
     public void checkRop(PartUpdateReqDto partUpdateReqDto) {
         List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(partUpdateReqDto.getWarehouseId(),
                 partUpdateReqDto.getItems().stream().map(PartDeltaDto::getId).collect(Collectors.toList()));
+        if (inventories.isEmpty())
+            throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
+
         List<PartDeltaDto> lackItems = new ArrayList<>();
         String warehouseName = inventories.get(0).getBranch().getName();
 
