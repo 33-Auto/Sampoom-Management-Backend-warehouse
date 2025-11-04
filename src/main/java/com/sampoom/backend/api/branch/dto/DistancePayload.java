@@ -1,7 +1,7 @@
 package com.sampoom.backend.api.branch.dto;
 
-import lombok.Getter;
 import lombok.Setter;
+import lombok.Getter;
 
 @Getter
 @Setter
