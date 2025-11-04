@@ -71,6 +71,13 @@ public class InventoryService {
     }
 
     @Transactional
+    public void deliveryProcess(DeliveryReqDto deliveryReqDto) {
+        this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()));
+        this.checkRop(deliveryReqDto);
+        orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.SHIPPING);
+    }
+
+    @Transactional
     public void updateParts(PartUpdateReqDto partUpdateReqDto) {
         if (partUpdateReqDto.getItems() == null || partUpdateReqDto.getItems().isEmpty()) {
             throw new BadRequestException(ErrorStatus.NO_UPDATE_PARTS_LIST.getMessage());
@@ -150,7 +157,6 @@ public class InventoryService {
                     .items(lackItems)
                     .build());
             eventService.setEventOutBox("order-to-factory-events", json);
-            orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.SHIPPING);
         }
     }
 
