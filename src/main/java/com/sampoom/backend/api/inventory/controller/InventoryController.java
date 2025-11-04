@@ -76,7 +76,7 @@ public class InventoryController {
 
     @PatchMapping("/stocking")
     public ResponseEntity<ApiResponse<Void>> stockingParts(@Valid @RequestBody PartUpdateReqDto partUpdateReqDto) {
-        inventoryService.updateParts(partUpdateReqDto);
+        inventoryService.stockingProcess(partUpdateReqDto);
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 

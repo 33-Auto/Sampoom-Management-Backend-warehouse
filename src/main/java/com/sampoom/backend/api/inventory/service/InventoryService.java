@@ -75,14 +75,43 @@ public class InventoryService {
 
     @Transactional
     public void deliveryProcess(DeliveryReqDto deliveryReqDto) {
-        this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()));
-        this.saveOutHistory(deliveryReqDto);
+        Map<Long, Inventory> inventoryMap = this.getInventoryMap(
+                deliveryReqDto.getWarehouseId(),
+                deliveryReqDto.getItems()
+        );
+
+        this.updateParts(new PartUpdateReqDto(deliveryReqDto.getWarehouseId(), deliveryReqDto.getItems()),
+                         inventoryMap);
+        this.saveOutHistory(deliveryReqDto.getItems(), inventoryMap);
         this.checkRop(deliveryReqDto);
         //orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
     }
 
     @Transactional
-    public void updateParts(PartUpdateReqDto partUpdateReqDto) {
+    public void stockingProcess(PartUpdateReqDto partUpdateReqDto) {
+        Map<Long, Inventory> inventoryMap = this.getInventoryMap(
+                partUpdateReqDto.getWarehouseId(),
+                partUpdateReqDto.getItems()
+        );
+
+        this.updateParts(partUpdateReqDto, inventoryMap);
+    }
+
+    private Map<Long, Inventory> getInventoryMap(Long warehouseId, List<PartDeltaDto> dtos) {
+        List<Long> partIds = dtos.stream().map(PartDeltaDto::getId).toList();
+
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
+
+        if (inventories.size() != partIds.size()) {
+            throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
+        }
+
+        return inventories.stream()
+                .collect(Collectors.toMap(inv -> inv.getPart().getId(), inv -> inv));
+    }
+
+    @Transactional
+    public void updateParts(PartUpdateReqDto partUpdateReqDto, Map<Long, Inventory> inventoryMap) {
         if (partUpdateReqDto.getItems() == null || partUpdateReqDto.getItems().isEmpty()) {
             throw new BadRequestException(ErrorStatus.NO_UPDATE_PARTS_LIST.getMessage());
         }
@@ -99,10 +128,9 @@ public class InventoryService {
 
         // 현재 수량 조회 & 미만 예외 확인
         for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
-            Inventory inv = inventoryRepository.findByBranch_IdAndPart_Id(partUpdateReqDto.getWarehouseId(), dto.getId())
-                    .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
+            Inventory inventory = inventoryMap.get(dto.getId());
 
-            if (inv.getQuantity() + dto.getDelta() < 0) {
+            if (inventory.getQuantity() + dto.getDelta() < 0) {
                 throw new BadRequestException(ErrorStatus.INVALID_PART_QUANTITY.getMessage() + " partId: " + dto.getId());
             }
         }
@@ -132,17 +160,12 @@ public class InventoryService {
     }
 
     @Transactional
-    protected void saveOutHistory(DeliveryReqDto deliveryReqDto) {
-        Long warehouseId = deliveryReqDto.getWarehouseId();
-        List<Object[]> updateList = new ArrayList<>();
-
-        for (PartDeltaDto dto : deliveryReqDto.getItems()) {
-            Inventory inventory = inventoryRepository
-                    .findByBranch_IdAndPart_Id(warehouseId, dto.getId())
-                    .orElseThrow(() -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage()));
-
-            updateList.add(new Object[] {inventory.getId(), Math.abs(dto.getDelta())});
-        }
+    protected void saveOutHistory(List<PartDeltaDto> items, Map<Long, Inventory> inventoryMap) {
+        List<Object[]> updateList = items.stream()
+                .map(item -> new Object[]{
+                        inventoryMap.get(item.getId()).getId(), item.getDelta()
+                })
+                .toList();
 
         if (updateList.isEmpty()) return ;
 
