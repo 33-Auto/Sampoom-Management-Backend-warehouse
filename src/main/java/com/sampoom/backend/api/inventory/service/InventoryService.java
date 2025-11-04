@@ -111,8 +111,10 @@ public class InventoryService {
 
         List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
 
-        if (inventories.size() != partIds.size()) {
+        if (inventories.size() > partIds.size()) { // 재고를 못 찾는 경우
             throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
+        } else if (inventories.size() < partIds.size()) { // 중복 부품이 들어온 경우
+            throw new BadRequestException(ErrorStatus.DUPLICATED_PART.getMessage());
         }
 
         return inventories.stream()
@@ -126,14 +128,6 @@ public class InventoryService {
         }
         if (!branchRepository.existsById(partUpdateReqDto.getWarehouseId()))
             throw new NotFoundException(ErrorStatus.BRANCH_NOT_FOUND.getMessage());
-
-        // 중복 ID 체크
-        Set<Long> uniqueIds = new HashSet<>();
-        for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
-            if (!uniqueIds.add(dto.getId())) {
-                throw new BadRequestException(ErrorStatus.DUPLICATED_PART.getMessage() + " partId: " + dto.getId());
-            }
-        }
 
         // 현재 수량 조회 & 미만 예외 확인
         for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
