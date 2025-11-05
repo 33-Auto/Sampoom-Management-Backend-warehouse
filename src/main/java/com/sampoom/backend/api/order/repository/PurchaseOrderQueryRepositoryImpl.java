@@ -84,6 +84,7 @@ public class PurchaseOrderQueryRepositoryImpl implements PurchaseOrderQueryRepos
                         .from(po)
                         .join(po.inventory, inventory)
                         .join(inventory.part, part)
+                        .join(rop).on(rop.inventory.eq(inventory))
                         .where(builder)
                         .fetchOne()
                 ).orElse(0L);

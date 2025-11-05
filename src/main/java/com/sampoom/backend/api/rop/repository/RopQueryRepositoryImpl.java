@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -72,13 +73,14 @@ public class RopQueryRepositoryImpl implements RopQueryRepository {
                 .orderBy(part.name.asc())
                 .fetch();
 
-        Long total = queryFactory
-                .select(rop.count())
-                .from(rop)
-                .join(rop.inventory, inventory)
-                .join(inventory.part, part)
-                .where(builder)
-                .fetchOne();
+        Long total = Optional.ofNullable(queryFactory
+                        .select(rop.count())
+                        .from(rop)
+                        .join(rop.inventory, inventory)
+                        .join(inventory.part, part)
+                        .where(builder)
+                        .fetchOne()
+                ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
     }
