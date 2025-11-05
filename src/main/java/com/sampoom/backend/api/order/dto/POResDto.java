@@ -53,4 +53,8 @@ public class POResDto {
         this.createdAt = createdAt;
         this.orderStatus = orderStatus;
     }
+
+    public String getOrderStatus() {
+        return this.orderStatus.toKorean();
+    }
 }

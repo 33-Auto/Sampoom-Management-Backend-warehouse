@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.order.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.Getter;
@@ -29,5 +30,10 @@ public enum OrderStatus {
             }
         }
         throw new BadRequestException(ErrorStatus.INVALID_ORDER_STATUS.getMessage() + koreanName);
+    }
+
+    @JsonValue
+    public String toKorean() {
+        return korean;
     }
 }
