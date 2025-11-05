@@ -41,6 +41,9 @@ public class RopResDto {
     }
 
     public String getAutoOrderStatus() {
+        if (autoOrderStatus == null) {
+            return null;
+        }
         return autoOrderStatus.getKorean();
     }
 }
