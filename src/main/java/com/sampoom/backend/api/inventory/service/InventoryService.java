@@ -1,17 +1,10 @@
 package com.sampoom.backend.api.inventory.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
-import com.sampoom.backend.api.event.entity.EventOutbox;
-import com.sampoom.backend.api.event.entity.EventStatus;
-import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.dto.*;
 import com.sampoom.backend.api.inventory.entity.Inventory;
-import com.sampoom.backend.api.inventory.entity.OutHistory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
-import com.sampoom.backend.api.inventory.repository.OutHistoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.OrderStatus;
@@ -35,8 +28,8 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -125,9 +118,8 @@ public class InventoryService {
 
         List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(warehouseId, partIds);
 
-        if (inventories.size() != partIds.size()) {
-            throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
-        }
+        if (inventories.size() < partIds.size()) // 재고를 못 찾거나 중복 부품
+            throw new BadRequestException(ErrorStatus.BAD_DELTA_REQUEST.getMessage());
 
         return inventories.stream()
                 .collect(Collectors.toMap(inv -> inv.getPart().getId(), inv -> inv));
@@ -140,14 +132,6 @@ public class InventoryService {
         }
         if (!branchRepository.existsById(partUpdateReqDto.getWarehouseId()))
             throw new NotFoundException(ErrorStatus.BRANCH_NOT_FOUND.getMessage());
-
-        // 중복 ID 체크
-        Set<Long> uniqueIds = new HashSet<>();
-        for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
-            if (!uniqueIds.add(dto.getId())) {
-                throw new BadRequestException(ErrorStatus.DUPLICATED_PART.getMessage() + " partId: " + dto.getId());
-            }
-        }
 
         // 현재 수량 조회 & 미만 예외 확인
         for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
@@ -263,7 +247,8 @@ public class InventoryService {
         return true;
     }
 
-    public Page<PartResDto> searchInventory(SearchReqDto req, Pageable pageable) {
+    public Page<PartResDto> searchInventory(SearchReqDto req, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         return inventoryRepository.search(req, pageable)
                 .map(this::toResponse);
     }

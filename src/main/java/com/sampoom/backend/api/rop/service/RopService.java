@@ -2,10 +2,7 @@ package com.sampoom.backend.api.rop.service;
 
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
-import com.sampoom.backend.api.rop.dto.RopItem;
-import com.sampoom.backend.api.rop.dto.RopReqDto;
-import com.sampoom.backend.api.rop.dto.RopResDto;
-import com.sampoom.backend.api.rop.dto.UpdateRopReqDto;
+import com.sampoom.backend.api.rop.dto.*;
 import com.sampoom.backend.api.rop.entity.Rop;
 import com.sampoom.backend.common.entitiy.Status;
 import com.sampoom.backend.api.rop.repository.RopRepository;
@@ -13,6 +10,10 @@ import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,18 +66,9 @@ public class RopService {
     }
 
     @Transactional(readOnly = true)
-    public RopResDto getAllRops(Long branchId) {
-        List<Rop> rops = ropRepository.findByInventory_Branch_IdAndIsDeletedFalse(branchId);
-        List<RopItem> ropItems = rops.stream().map(
-                r -> RopItem.builder()
-                        .ropId(r.getId())
-                        .rop(r.getRop())
-                        .build()
-        ).toList();
-
-        return RopResDto.builder()
-                .ropItems(ropItems)
-                .build();
+    public Page<RopResDto> getRops(RopFilterDto ropFilterDto, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+       return ropRepository.search(ropFilterDto, pageable);
     }
 
     @Transactional

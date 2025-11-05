@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RopRepository extends JpaRepository<Rop, Long> {
+public interface RopRepository extends JpaRepository<Rop, Long>, RopQueryRepository {
     List<Rop> findByInventory_Branch_IdAndIsDeletedFalse(Long branchId);
     Optional<Rop> findByInventory_Id(Long inventoryId);
 

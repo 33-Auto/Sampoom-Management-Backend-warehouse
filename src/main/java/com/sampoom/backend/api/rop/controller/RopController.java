@@ -1,13 +1,16 @@
 package com.sampoom.backend.api.rop.controller;
 
+import com.sampoom.backend.api.rop.dto.RopFilterDto;
 import com.sampoom.backend.api.rop.dto.RopReqDto;
 import com.sampoom.backend.api.rop.dto.RopResDto;
 import com.sampoom.backend.api.rop.dto.UpdateRopReqDto;
 import com.sampoom.backend.api.rop.entity.Rop;
 import com.sampoom.backend.api.rop.service.RopService;
+import com.sampoom.backend.common.entitiy.Status;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,9 +32,22 @@ public class RopController {
         return ApiResponse.success_only(SuccessStatus.CREATED);
     }
 
-    @GetMapping("/{warehouseId}")
-    public ResponseEntity<ApiResponse<RopResDto>> getAllRops(@PathVariable Long warehouseId) {
-        return ApiResponse.success(SuccessStatus.OK, ropService.getAllRops(warehouseId));
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<RopResDto>>> getRops(@RequestParam Long warehouseId,
+                                                                @RequestParam(required = false) Long categoryId,
+                                                                @RequestParam(required = false) Long groupId,
+                                                                @RequestParam(required = false) String keyword,
+                                                                @RequestParam(required = false) Status autoOrderStatus,
+                                                                @RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "20") int size) {
+        RopFilterDto ropFilterDto = RopFilterDto.builder()
+                .warehouseId(warehouseId)
+                .categoryId(categoryId)
+                .groupId(groupId)
+                .keyword(keyword)
+                .autoOrderStatus(autoOrderStatus)
+                .build();
+        return ApiResponse.success(SuccessStatus.OK, ropService.getRops(ropFilterDto, page, size));
     }
 
     @PatchMapping

@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.rop.entity;
 
 import com.sampoom.backend.api.inventory.entity.Inventory;
+import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import com.sampoom.backend.common.entitiy.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Rop {
+public class Rop extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
