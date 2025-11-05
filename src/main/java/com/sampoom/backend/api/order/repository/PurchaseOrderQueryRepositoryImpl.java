@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -78,13 +79,14 @@ public class PurchaseOrderQueryRepositoryImpl implements PurchaseOrderQueryRepos
                 .orderBy(po.createdAt.desc())
                 .fetch();
 
-        Long total = queryFactory
-                .select(po.count())
-                .from(po)
-                .join(po.inventory, inventory)
-                .join(inventory.part, part)
-                .where(builder)
-                .fetchOne();
+        Long total = Optional.ofNullable(queryFactory
+                        .select(po.count())
+                        .from(po)
+                        .join(po.inventory, inventory)
+                        .join(inventory.part, part)
+                        .where(builder)
+                        .fetchOne()
+                ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
     }
