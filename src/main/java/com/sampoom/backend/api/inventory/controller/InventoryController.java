@@ -8,7 +8,6 @@ import com.sampoom.backend.common.response.SuccessStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,8 +78,21 @@ public class InventoryController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<PartResDto>>> search(@ModelAttribute SearchReqDto req, Pageable pageable) {
-        return ApiResponse.success(SuccessStatus.OK, inventoryService.searchInventory(req, pageable));
+    public ResponseEntity<ApiResponse<Page<PartResDto>>> search(@RequestParam Long warehouseId,
+                                                                @RequestParam(required = false) Long categoryId,
+                                                                @RequestParam(required = false) Long groupId,
+                                                                @RequestParam(required = false) String keyword,
+                                                                @RequestParam(required = false) QuantityStatus quantityStatus,
+                                                                @RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "20") int size) {
+        SearchReqDto searchReqDto = SearchReqDto.builder()
+                .warehouseId(warehouseId)
+                .categoryId(categoryId)
+                .groupId(groupId)
+                .keyword(keyword)
+                .quantityStatus(quantityStatus)
+                .build();
+        return ApiResponse.success(SuccessStatus.OK, inventoryService.searchInventory(searchReqDto, page, size));
     }
 
 }
