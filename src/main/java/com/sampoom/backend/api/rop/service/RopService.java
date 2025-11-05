@@ -2,6 +2,13 @@ package com.sampoom.backend.api.rop.service;
 
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
+import com.sampoom.backend.api.order.dto.POResDto;
+import com.sampoom.backend.api.part.entity.Category;
+import com.sampoom.backend.api.part.entity.Part;
+import com.sampoom.backend.api.part.entity.PartGroup;
+import com.sampoom.backend.api.part.repository.CategoryRepository;
+import com.sampoom.backend.api.part.repository.PartGroupRepository;
+import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.api.rop.dto.*;
 import com.sampoom.backend.api.rop.entity.Rop;
 import com.sampoom.backend.common.entitiy.Status;
@@ -13,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +30,9 @@ import java.util.List;
 public class RopService {
     private final RopRepository ropRepository;
     private final InventoryRepository inventoryRepository;
+    private final PartRepository partRepository;
+    private final PartGroupRepository partGroupRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
     public void createRop(Long warehouseId) {
@@ -68,7 +77,21 @@ public class RopService {
     @Transactional(readOnly = true)
     public Page<RopResDto> getRops(RopFilterDto ropFilterDto, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-       return ropRepository.search(ropFilterDto, pageable);
+       return ropRepository.search(ropFilterDto, pageable).map(this::attachNames);
+    }
+
+    private RopResDto attachNames(RopResDto ropResDto) {
+        Part part = partRepository.findByCode(ropResDto.getPartCode()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
+        Category category = categoryRepository.findById(part.getCategoryId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
+        PartGroup group = partGroupRepository.findById(part.getGroupId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND.getMessage()));
+
+        ropResDto.setCategoryName(category.getName());
+        ropResDto.setGroupName(group.getName());
+
+        return ropResDto;
     }
 
     @Transactional
