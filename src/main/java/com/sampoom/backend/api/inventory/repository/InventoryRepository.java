@@ -18,16 +18,16 @@ import static jakarta.persistence.LockModeType.PESSIMISTIC_WRITE;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Long>, InventoryQueryRepository {
     @Query("""
-            SELECT new com.sampoom.backend.api.inventory.dto.PartResDto(
+        SELECT new com.sampoom.backend.api.inventory.dto.PartResDto(
             p.id, c.name, g.name, p.name, p.code, i.quantity, i.quantityStatus)
-            FROM Inventory i
-            JOIN i.part p
-            JOIN PartGroup g ON p.groupId = g.id
-            JOIN Category c ON g.categoryId = c.id
-            WHERE i.branch.id = :branchId
+        FROM Inventory i
+        JOIN i.part p
+        JOIN PartGroup g ON p.groupId = g.id
+        JOIN Category c ON g.categoryId = c.id
+        WHERE i.branch.id = :branchId
             AND (:categoryId IS NULL OR c.id = :categoryId)
             AND (:groupId IS NULL OR g.id = :groupId)
-            """)
+    """)
     List<PartResDto> findParts(
             @Param("branchId") Long branchId,
             @Param("categoryId") Long categoryId,
@@ -36,13 +36,13 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Inv
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
-    INSERT INTO inventory (branch_id, part_id, quantity, quantity_status, average_daily, lead_time, max_stock, created_at, updated_at)
-    SELECT :branchId, p.id, p.safety_stock*2, 'ENOUGH', p.safety_stock/5, 5, p.safety_stock*5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-    FROM part p
-    WHERE NOT EXISTS (
-        SELECT 1 FROM inventory i
-        WHERE i.branch_id = :branchId AND i.part_id = p.id
-    )
+        INSERT INTO inventory (branch_id, part_id, quantity, quantity_status, average_daily, lead_time, max_stock, created_at, updated_at)
+        SELECT :branchId, p.id, p.safety_stock*2, 'ENOUGH', p.safety_stock/5, 5, p.safety_stock*5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        FROM part p
+        WHERE NOT EXISTS (
+            SELECT 1 FROM inventory i
+            WHERE i.branch_id = :branchId AND i.part_id = p.id
+        )
     """, nativeQuery = true)
     void initializeInventory(@Param("branchId") Long branchId);
 
@@ -63,13 +63,21 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Inv
     Optional<Inventory> findByBranch_IdAndPart_Code(Long branchId, String code);
 
     @Query("""
-        select new com.sampoom.backend.api.inventory.dto.PartItemDto(
+        SELECT NEW com.sampoom.backend.api.inventory.dto.PartItemDto(
             i.part.id,
             i.quantity
         )
-        from Inventory i
-        where i.branch.id = :warehouseId
-          and i.part.id in :partIds
+        FROM Inventory i
+        WHERE i.branch.id = :warehouseId
+            AND i.part.id In :partIds
     """)
     List<PartItemDto> findPartBrief(Long warehouseId, List<Long> partIds);
+
+    @Query("""
+        SELECT i.part.id
+        FROM Inventory i
+        WHERE i.branch.id = :branchId
+            AND i.part.id IN :partIds
+    """)
+    List<Long> findPartIdsByBranch_Id(Long branchId, List<Long> partIds);
 }
