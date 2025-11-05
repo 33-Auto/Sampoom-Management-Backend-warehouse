@@ -12,7 +12,8 @@ public enum OrderStatus {
     SHIPPING("배송 중"),
     DELAYED("배송 지연"),
     PRODUCING("생산 중"),
-    COMPLETED("배송 완료"),
+    ARRIVED("배송 완료"),
+    COMPLETED("입고 완료"),
     CANCELED("주문 취소");
 
     private final String korean;

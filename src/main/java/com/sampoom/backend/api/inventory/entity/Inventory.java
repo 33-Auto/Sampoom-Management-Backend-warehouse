@@ -25,7 +25,7 @@ public class Inventory extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "part_id", nullable = false,
-            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // 🔥 FK 제약조건 생성 방지
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // FK 제약조건 생성 방지
     private Part part;
 
     @Column(nullable = false)
