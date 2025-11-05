@@ -56,8 +56,7 @@ public class PurchaseOrderService {
 
     private POResDto attachNames(POResDto poResDtos) {
         Part part = partRepository.findByCode(poResDtos.getPartCode()).orElseThrow(
-                () -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage())
-        );
+                () -> new NotFoundException(ErrorStatus.PART_NOT_FOUND.getMessage()));
         Category category = categoryRepository.findById(part.getCategoryId())
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
         PartGroup group = partGroupRepository.findById(part.getGroupId())

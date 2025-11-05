@@ -18,7 +18,7 @@ public class Rop extends BaseTimeEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inventory_id")
+    @JoinColumn(name = "inventory_id", nullable = false)
     private Inventory inventory;
 
     @Column(nullable = false)
