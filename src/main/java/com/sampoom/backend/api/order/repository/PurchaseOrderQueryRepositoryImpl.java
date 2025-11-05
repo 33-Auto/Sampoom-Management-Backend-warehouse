@@ -1,13 +1,16 @@
-package com.sampoom.backend.api.rop.repository;
+package com.sampoom.backend.api.order.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sampoom.backend.api.inventory.entity.QInventory;
+import com.sampoom.backend.api.order.dto.POFilterDto;
+import com.sampoom.backend.api.order.dto.POResDto;
+import com.sampoom.backend.api.order.dto.QPOResDto;
+import com.sampoom.backend.api.order.entity.QPurchaseOrder;
+import com.sampoom.backend.api.part.entity.QCategory;
 import com.sampoom.backend.api.part.entity.QPart;
-import com.sampoom.backend.api.rop.dto.RopFilterDto;
-import com.sampoom.backend.api.rop.dto.RopResDto;
+import com.sampoom.backend.api.part.entity.QPartGroup;
 import com.sampoom.backend.api.rop.entity.QRop;
-import com.sampoom.backend.api.rop.dto.QRopResDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -19,24 +22,26 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class RopQueryRepositoryImpl implements RopQueryRepository {
+public class PurchaseOrderQueryRepositoryImpl implements PurchaseOrderQueryRepository {
     private final JPAQueryFactory queryFactory;
-    QRop rop = QRop.rop1;
-    QInventory inventory = QInventory.inventory;
-    QPart part = QPart.part;
 
     @Override
-    public Page<RopResDto> search(RopFilterDto req, Pageable pageable) {
+    public Page<POResDto> search(POFilterDto req, Pageable pageable) {
+        QPurchaseOrder po = QPurchaseOrder.purchaseOrder;
+        QInventory inventory = QInventory.inventory;
+        QPart part = QPart.part;
+        QRop rop = QRop.rop1;
 
         BooleanBuilder builder = new BooleanBuilder();
 
         builder.and(inventory.branch.id.eq(req.getWarehouseId()));
-        builder.and(rop.isDeleted.eq(false));
+        builder.and(po.inventory.eq(inventory));
 
         if (req.getKeyword() != null && !req.getKeyword().isBlank()) {
             builder.and(
                     part.code.contains(req.getKeyword())
                             .or(part.name.contains(req.getKeyword()))
+                            .or(po.orderNumber.contains(req.getKeyword()))
             );
         }
         if (req.getCategoryId() != null) {
@@ -45,39 +50,41 @@ public class RopQueryRepositoryImpl implements RopQueryRepository {
         if (req.getGroupId() != null) {
             builder.and(part.groupId.eq(req.getGroupId()));
         }
-        if (req.getAutoOrderStatus() != null) {
-            builder.and(rop.autoOrderStatus.eq(req.getAutoOrderStatus()));
+        if (req.getStatus() != null) {
+            builder.and(po.status.eq(req.getStatus()));
         }
 
-        List<RopResDto> content = queryFactory
-                .select(new QRopResDto(
-                        part.id,
-                        part.code,
+        List<POResDto> content = queryFactory
+                .select(new QPOResDto(
+                        po.orderNumber,
                         part.name,
-                        part.categoryId,
-                        part.groupId,
-                        part.unit,
+                        part.code,
                         inventory.quantity,
                         rop.rop,
-                        inventory.maxStock,
-                        inventory.leadTime,
-                        rop.autoOrderStatus,
-                        rop.updatedAt.coalesce(rop.createdAt)
+                        part.unit,
+                        po.quantity,
+                        po.inboundQuantity,
+                        po.quantity.subtract(po.inboundQuantity),
+                        po.price,
+                        po.createdAt,
+                        po.status
                 ))
-                .from(rop)
-                .join(rop.inventory, inventory)
+                .from(po)
+                .join(po.inventory, inventory)
                 .join(inventory.part, part)
+                .join(rop).on(rop.inventory.eq(inventory))
                 .where(builder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(part.name.asc())
+                .orderBy(po.createdAt.desc())
                 .fetch();
 
         Long total = Optional.ofNullable(queryFactory
-                        .select(rop.count())
-                        .from(rop)
-                        .join(rop.inventory, inventory)
+                        .select(po.count())
+                        .from(po)
+                        .join(po.inventory, inventory)
                         .join(inventory.part, part)
+                        .join(rop).on(rop.inventory.eq(inventory))
                         .where(builder)
                         .fetchOne()
                 ).orElse(0L);

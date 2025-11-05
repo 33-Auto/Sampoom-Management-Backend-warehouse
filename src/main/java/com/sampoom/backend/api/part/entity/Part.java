@@ -17,7 +17,7 @@ public class Part extends BaseTimeEntity {
     @Id
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String code;
 
     @Column(nullable = false)

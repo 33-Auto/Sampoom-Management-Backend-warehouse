@@ -7,6 +7,10 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
+import com.sampoom.backend.api.order.dto.OrderStatus;
+import com.sampoom.backend.api.order.entity.PurchaseOrder;
+import com.sampoom.backend.api.order.service.OrderService;
+import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
@@ -28,6 +32,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,6 +47,7 @@ public class InventoryService {
     private final RopRepository ropRepository;
     private final EventService eventService;
     private final BranchRepository branchRepository;
+    private final PurchaseOrderService purchaseOrderService;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -190,35 +198,40 @@ public class InventoryService {
 
     @Transactional
     public void checkRop(DeliveryReqDto deliveryReqDto) {
-        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(deliveryReqDto.getWarehouseId(),
-                deliveryReqDto.getItems().stream().map(PartDeltaDto::getId).collect(Collectors.toList()));
-        if (inventories.isEmpty())
-            throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
+        List<Long> partIds = deliveryReqDto.getItems().stream().map(PartDeltaDto::getId).toList();
 
+        List<Rop> ropList = ropRepository.findWithInventoryByAutoOrderStatusAndBranch_IdAndPart_IdIn(
+                Status.ACTIVE,
+                deliveryReqDto.getWarehouseId(),
+                partIds
+        );
+        if (ropList.isEmpty()) return;
+
+        Long warehouseId = ropList.get(0).getInventory().getBranch().getId();
+        String warehouseName = ropList.get(0).getInventory().getBranch().getName();
         List<PartDeltaDto> lackItems = new ArrayList<>();
-        String warehouseName = inventories.get(0).getBranch().getName();
 
-        // 재고 없는 것들 수집
-        for (Inventory inventory : inventories) {
-            Rop rop = ropRepository.findWithInventoryByInventory_IdAndAutoOrderStatusAndIsDeletedFalse(inventory.getId(), Status.ACTIVE)
-                    .orElseThrow(() -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage()));
+        for (Rop rop : ropList) {
+            Inventory inventory = rop.getInventory();
 
             if (inventory.getQuantity() <= rop.getRop()) {
+                Integer orderQuantity = inventory.getMaxStock() - inventory.getQuantity();
+
+                purchaseOrderService.makePurchaseOrder(inventory, orderQuantity);
                 lackItems.add(PartDeltaDto.builder()
                         .id(inventory.getPart().getId())
-                        .delta(inventory.getMaxStock() - inventory.getQuantity())
+                        .delta(orderQuantity)
                         .build());
             }
         }
+        if (lackItems.isEmpty()) return;
 
-        // 주문서 발행
-        if (!lackItems.isEmpty()) {
-            String json = eventService.serializePayload(OrderToFactoryDto.builder()
-                    .warehouseName(warehouseName)
-                    .items(lackItems)
-                    .build());
-            eventService.setEventOutBox("order-to-factory-events", json);
-        }
+        OrderToFactoryDto event = OrderToFactoryDto.builder()
+                .warehouseId(warehouseId)
+                .warehouseName(warehouseName)
+                .items(lackItems)
+                .build();
+        eventService.setEventOutBox("order-to-factory-events", eventService.serializePayload(event));
     }
 
     public boolean isStockAvailable(OrderReqDto orderReqDto) {

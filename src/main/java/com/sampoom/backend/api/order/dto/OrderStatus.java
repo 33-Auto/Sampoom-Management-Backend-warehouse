@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.order.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.Getter;
@@ -12,7 +13,8 @@ public enum OrderStatus {
     SHIPPING("배송 중"),
     DELAYED("배송 지연"),
     PRODUCING("생산 중"),
-    COMPLETED("배송 완료"),
+    ARRIVED("배송 완료"),
+    COMPLETED("입고 완료"),
     CANCELED("주문 취소");
 
     private final String korean;
@@ -28,5 +30,10 @@ public enum OrderStatus {
             }
         }
         throw new BadRequestException(ErrorStatus.INVALID_ORDER_STATUS.getMessage() + koreanName);
+    }
+
+    @JsonValue
+    public String toKorean() {
+        return korean;
     }
 }
