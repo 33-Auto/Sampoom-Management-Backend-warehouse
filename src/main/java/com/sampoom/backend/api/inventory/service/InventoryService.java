@@ -7,9 +7,6 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
-import com.sampoom.backend.api.order.dto.OrderStatus;
-import com.sampoom.backend.api.order.entity.PurchaseOrder;
-import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
@@ -25,12 +22,12 @@ import com.sampoom.backend.common.response.ErrorStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -273,5 +270,20 @@ public class InventoryService {
                 .unit(inv.getPart().getUnit())
                 .partValue(inv.getPart().getStandardCost())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartItemDto> getInventoryBrief(Long warehouseId, List<Long> partIds) {
+        if (!branchRepository.existsById(warehouseId))
+            throw new NotFoundException(ErrorStatus.WAREHOUSE_NOT_FOUND.getMessage());
+
+        List<Long> existingPartIds = inventoryRepository.findPartIdsByBranch_Id(warehouseId, partIds);
+        if (existingPartIds.size() != partIds.size()) {
+            List<Long> missing = new ArrayList<>(partIds);
+            missing.removeAll(existingPartIds);
+            throw new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage() + ": " + missing);
+        }
+
+        return inventoryRepository.findPartBrief(warehouseId, partIds);
     }
 }

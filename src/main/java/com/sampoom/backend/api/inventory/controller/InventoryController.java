@@ -95,4 +95,9 @@ public class InventoryController {
         return ApiResponse.success(SuccessStatus.OK, inventoryService.searchInventory(searchReqDto, page, size));
     }
 
+    @GetMapping("/order")
+    public ResponseEntity<ApiResponse<List<PartItemDto>>> getInventoryBrief(@RequestParam Long warehouseId,
+                                                                            @RequestParam List<Long> partIds) {
+        return ApiResponse.success(SuccessStatus.OK, inventoryService.getInventoryBrief(warehouseId, partIds));
+    }
 }
