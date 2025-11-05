@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.inventory.repository;
 
+import com.sampoom.backend.api.inventory.dto.PartItemDto;
 import com.sampoom.backend.api.inventory.dto.PartResDto;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -60,4 +61,15 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Inv
     List<Inventory> findWithPartByBranchId(@Param("branchId") Long branchId);
 
     Optional<Inventory> findByBranch_IdAndPart_Code(Long branchId, String code);
+
+    @Query("""
+        select new com.sampoom.backend.api.inventory.dto.PartItemDto(
+            i.part.id,
+            i.quantity
+        )
+        from Inventory i
+        where i.branch.id = :warehouseId
+          and i.part.id in :partIds
+    """)
+    List<PartItemDto> findPartBrief(Long warehouseId, List<Long> partIds);
 }

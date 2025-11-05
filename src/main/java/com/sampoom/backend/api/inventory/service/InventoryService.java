@@ -274,4 +274,8 @@ public class InventoryService {
                 .partValue(inv.getPart().getStandardCost())
                 .build();
     }
+
+    public List<PartItemDto> getInventoryBrief(Long warehouseId, List<Long> partIds) {
+        return inventoryRepository.findPartBrief(warehouseId, partIds);
+    }
 }
