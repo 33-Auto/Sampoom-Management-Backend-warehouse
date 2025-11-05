@@ -69,7 +69,7 @@ public class RopQueryRepositoryImpl implements RopQueryRepository {
                 .where(builder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(part.id.asc())
+                .orderBy(part.name.asc())
                 .fetch();
 
         Long total = queryFactory
