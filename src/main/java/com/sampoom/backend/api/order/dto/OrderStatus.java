@@ -31,9 +31,4 @@ public enum OrderStatus {
         }
         throw new BadRequestException(ErrorStatus.INVALID_ORDER_STATUS.getMessage() + koreanName);
     }
-
-    @JsonValue
-    public String toKorean() {
-        return korean;
-    }
 }

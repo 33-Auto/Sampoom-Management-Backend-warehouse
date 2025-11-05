@@ -57,6 +57,6 @@ public class POResDto {
     public String getOrderStatus() {
         if (orderStatus == null)
             return null;
-        return this.orderStatus.toKorean();
+        return this.orderStatus.getKorean();
     }
 }
