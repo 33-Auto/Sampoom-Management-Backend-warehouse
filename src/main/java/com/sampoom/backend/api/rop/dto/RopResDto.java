@@ -7,13 +7,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class RopResDto {
     private Long partId;
     private String partCode;
     private String partName;
-    private Long categoryId;
-    private Long groupId;
+    private String categoryName;
+    private String groupName;
     private String unit;
     private Integer quantity;
     private Integer rop;
@@ -23,14 +25,12 @@ public class RopResDto {
     private LocalDateTime updatedAt;
 
     @QueryProjection
-    public RopResDto(Long partId, String partCode, String partName, Long categoryId, Long groupId,
-                     String unit, Integer quantity, Integer rop, Integer maxStock, Integer leadTime,
+    public RopResDto(Long partId, String partCode, String partName, String unit,
+                     Integer quantity, Integer rop, Integer maxStock, Integer leadTime,
                      Status autoOrderStatus, LocalDateTime updatedAt) {
         this.partId = partId;
         this.partCode = partCode;
         this.partName = partName;
-        this.categoryId = categoryId;
-        this.groupId = groupId;
         this.unit = unit;
         this.quantity = quantity;
         this.rop = rop;

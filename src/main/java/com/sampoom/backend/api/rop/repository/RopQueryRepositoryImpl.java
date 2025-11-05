@@ -54,8 +54,6 @@ public class RopQueryRepositoryImpl implements RopQueryRepository {
                         part.id,
                         part.code,
                         part.name,
-                        part.categoryId,
-                        part.groupId,
                         part.unit,
                         inventory.quantity,
                         rop.rop,
