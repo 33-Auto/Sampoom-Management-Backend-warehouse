@@ -37,7 +37,7 @@ public class RopController {
                                                                 @RequestParam(required = false) Long categoryId,
                                                                 @RequestParam(required = false) Long groupId,
                                                                 @RequestParam(required = false) String keyword,
-                                                                @RequestParam(required = false)Status autoOrderStatus,
+                                                                @RequestParam(required = false) Status autoOrderStatus,
                                                                 @RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "20") int size) {
         RopFilterDto ropFilterDto = RopFilterDto.builder()
