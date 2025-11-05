@@ -39,4 +39,11 @@ public class RopResDto {
         this.autoOrderStatus = autoOrderStatus;
         this.updatedAt = updatedAt;
     }
+
+    public String getAutoOrderStatus() {
+        if (autoOrderStatus == null) {
+            return null;
+        }
+        return autoOrderStatus.getKorean();
+    }
 }

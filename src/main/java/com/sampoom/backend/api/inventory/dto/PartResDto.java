@@ -30,4 +30,10 @@ public class PartResDto {
         this.quantity = quantity;
         this.status = status;
     }
+
+    public String getStatus() {
+        if (status == null)
+            return null;
+        return status.getKorean();
+    }
 }
