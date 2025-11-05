@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface RopRepository extends JpaRepository<Rop, Long> {
+public interface RopRepository extends JpaRepository<Rop, Long>, RopQueryRepository {
     List<Rop> findByInventory_Branch_IdAndIsDeletedFalse(Long branchId);
     Optional<Rop> findByInventory_Id(Long inventoryId);
 
