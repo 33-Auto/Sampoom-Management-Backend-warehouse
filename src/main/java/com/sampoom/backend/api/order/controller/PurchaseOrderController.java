@@ -1,6 +1,6 @@
 package com.sampoom.backend.api.order.controller;
 
-import com.sampoom.backend.api.order.dto.OrderStatus;
+import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.dto.POFilterDto;
 import com.sampoom.backend.api.order.dto.POResDto;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;

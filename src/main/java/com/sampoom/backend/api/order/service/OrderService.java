@@ -1,18 +1,13 @@
 package com.sampoom.backend.api.order.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.branch.entity.AWDistance;
 import com.sampoom.backend.api.branch.entity.Branch;
 import com.sampoom.backend.api.branch.repository.AWDistanceRepository;
 import com.sampoom.backend.api.branch.repository.BranchRepository;
-import com.sampoom.backend.api.event.entity.EventOutbox;
-import com.sampoom.backend.api.event.entity.EventStatus;
-import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.*;
-import com.sampoom.backend.common.exception.BadRequestException;
+import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
