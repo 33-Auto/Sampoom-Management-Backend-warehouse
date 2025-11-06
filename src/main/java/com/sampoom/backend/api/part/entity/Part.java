@@ -1,9 +1,8 @@
 package com.sampoom.backend.api.part.entity;
 
-import com.sampoom.backend.common.entitiy.BaseTimeEntity;
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.BaseTimeEntity;
+import com.sampoom.backend.common.entity.Status;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity

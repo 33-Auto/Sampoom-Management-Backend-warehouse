@@ -15,7 +15,7 @@ import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.rop.dto.OrderToFactoryDto;
 import com.sampoom.backend.api.rop.entity.Rop;
 import com.sampoom.backend.api.rop.repository.RopRepository;
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.Status;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
@@ -29,9 +29,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 

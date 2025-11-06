@@ -1,7 +1,7 @@
 package com.sampoom.backend.api.order.entity;
 
 import com.sampoom.backend.api.inventory.entity.Inventory;
-import com.sampoom.backend.common.entitiy.BaseTimeEntity;
+import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

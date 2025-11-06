@@ -1,9 +1,8 @@
 package com.sampoom.backend.api.part.entity;
 
-import com.sampoom.backend.common.entitiy.BaseTimeEntity;
+import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Immutable;
 
 @Entity
 @Table(name = "category")

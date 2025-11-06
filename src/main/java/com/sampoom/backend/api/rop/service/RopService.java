@@ -2,7 +2,6 @@ package com.sampoom.backend.api.rop.service;
 
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
-import com.sampoom.backend.api.order.dto.POResDto;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.Part;
 import com.sampoom.backend.api.part.entity.PartGroup;
@@ -11,7 +10,7 @@ import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
 import com.sampoom.backend.api.rop.dto.*;
 import com.sampoom.backend.api.rop.entity.Rop;
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.Status;
 import com.sampoom.backend.api.rop.repository.RopRepository;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;

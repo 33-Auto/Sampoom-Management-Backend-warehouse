@@ -1,7 +1,7 @@
 package com.sampoom.backend.api.rop.repository;
 
 import com.sampoom.backend.api.rop.entity.Rop;
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

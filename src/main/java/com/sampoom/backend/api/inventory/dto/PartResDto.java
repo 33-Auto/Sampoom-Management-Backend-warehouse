@@ -1,7 +1,6 @@
 package com.sampoom.backend.api.inventory.dto;
 
 import com.sampoom.backend.api.part.entity.QuantityStatus;
-import com.sampoom.backend.common.entitiy.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
