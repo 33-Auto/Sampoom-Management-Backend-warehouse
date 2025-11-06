@@ -56,6 +56,7 @@ public class RopQueryRepositoryImpl implements RopQueryRepository {
                         part.name,
                         part.unit,
                         inventory.quantity,
+                        rop.id,
                         rop.rop,
                         inventory.maxStock,
                         inventory.leadTime,
