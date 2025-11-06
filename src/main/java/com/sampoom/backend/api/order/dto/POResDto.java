@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.order.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
+import com.sampoom.backend.api.order.entity.OrderStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;

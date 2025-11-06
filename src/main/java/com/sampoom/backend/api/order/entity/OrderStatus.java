@@ -1,7 +1,6 @@
-package com.sampoom.backend.api.order.dto;
+package com.sampoom.backend.api.order.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.Getter;

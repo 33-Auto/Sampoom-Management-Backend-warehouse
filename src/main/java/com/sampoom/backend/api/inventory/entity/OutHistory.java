@@ -1,6 +1,6 @@
 package com.sampoom.backend.api.inventory.entity;
 
-import com.sampoom.backend.common.entitiy.BaseTimeEntity;
+import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

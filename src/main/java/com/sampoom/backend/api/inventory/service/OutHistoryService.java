@@ -6,7 +6,7 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.inventory.repository.OutHistoryRepository;
 import com.sampoom.backend.api.rop.entity.Rop;
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.Status;
 import com.sampoom.backend.api.rop.repository.RopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;

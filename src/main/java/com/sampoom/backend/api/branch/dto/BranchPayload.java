@@ -1,6 +1,6 @@
 package com.sampoom.backend.api.branch.dto;
 
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.Status;
 import lombok.Getter;
 import lombok.Setter;
 
