@@ -21,7 +21,7 @@ public class OrderStatusConverter implements Converter<String, OrderStatus> {
         try {
             return OrderStatus.valueOf(input.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException(ErrorStatus.INVALID_ORDER_STATUS + ": " + input);
+            throw new BadRequestException(ErrorStatus.INVALID_ORDER_STATUS.getMessage() + ": " + input);
         }
     }
 }
