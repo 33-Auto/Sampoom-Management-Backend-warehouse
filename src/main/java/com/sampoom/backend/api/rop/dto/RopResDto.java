@@ -18,6 +18,7 @@ public class RopResDto {
     private String groupName;
     private String unit;
     private Integer quantity;
+    private Long ropId;
     private Integer rop;
     private Integer maxStock;
     private Integer leadTime;
@@ -26,13 +27,14 @@ public class RopResDto {
 
     @QueryProjection
     public RopResDto(Long partId, String partCode, String partName, String unit,
-                     Integer quantity, Integer rop, Integer maxStock, Integer leadTime,
+                     Integer quantity, Long ropId, Integer rop, Integer maxStock, Integer leadTime,
                      Status autoOrderStatus, LocalDateTime updatedAt) {
         this.partId = partId;
         this.partCode = partCode;
         this.partName = partName;
         this.unit = unit;
         this.quantity = quantity;
+        this.ropId = ropId;
         this.rop = rop;
         this.maxStock = maxStock;
         this.leadTime = leadTime;
