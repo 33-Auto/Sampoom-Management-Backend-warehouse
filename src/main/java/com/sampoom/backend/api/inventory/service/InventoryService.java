@@ -7,6 +7,7 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
+import com.sampoom.backend.api.order.entity.POStatus;
 import com.sampoom.backend.api.order.entity.PurchaseOrder;
 import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
@@ -210,6 +211,8 @@ public class InventoryService {
 
         for (Rop rop : ropList) {
             Inventory inventory = rop.getInventory();
+
+            if (purchaseOrderRepository.existsByInventoryAndStatusNot(inventory, POStatus.COMPLETED)) continue;
 
             if (inventory.getQuantity() <= rop.getRop()) {
                 int orderQuantity = inventory.getMaxStock() - inventory.getQuantity();
