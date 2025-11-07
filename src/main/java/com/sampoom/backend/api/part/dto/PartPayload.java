@@ -18,4 +18,5 @@ public class PartPayload {
     private Long groupId;
     private Long categoryId;
     private Integer standardCost;
+    private Integer standardQuantity;
 }

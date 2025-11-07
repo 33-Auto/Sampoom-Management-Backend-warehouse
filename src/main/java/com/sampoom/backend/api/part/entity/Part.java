@@ -46,4 +46,7 @@ public class Part extends BaseTimeEntity {
 
     @Column(name = "category_id", nullable = false)
     private Long categoryId;
+
+    @Column(name = "standard_quantity", nullable = false)
+    private Integer standardQuantity;
 }
