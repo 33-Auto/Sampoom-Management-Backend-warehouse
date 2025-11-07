@@ -40,5 +40,6 @@ public class PurchaseOrder extends BaseTimeEntity {
     private Double progressRate = 0.0;
 
     @Column(name = "is_deleted")
-    private boolean isDeleted;
+    @Builder.Default
+    private boolean deleted = false;
 }

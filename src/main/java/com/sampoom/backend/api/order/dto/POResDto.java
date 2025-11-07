@@ -1,7 +1,6 @@
 package com.sampoom.backend.api.order.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
-import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.POStatus;
 import lombok.*;
 

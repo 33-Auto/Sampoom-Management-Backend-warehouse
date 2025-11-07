@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.order.dto;
 
-import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.POStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class POEventPayload {
-    private Long PartOrderId;
+    private Long partOrderId;
     private String orderCode;
     private Long factoryId;
     private String factoryName;
