@@ -45,6 +45,7 @@ public enum ErrorStatus {
     WAREHOUSE_NOT_FOUND(HttpStatus.NOT_FOUND, "창고가 존재하지 않습니다"),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리가 존재하지 않습니다."),
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹이 존재하지 않습니다."),
+    PO_NOT_FOUND(HttpStatus.NOT_FOUND, "발주 주문서를 찾을 수 없습니다."),
 
 
     // 409 CONFLICT

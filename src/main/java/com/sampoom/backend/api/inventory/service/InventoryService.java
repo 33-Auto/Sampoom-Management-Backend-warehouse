@@ -7,6 +7,8 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
+import com.sampoom.backend.api.order.entity.PurchaseOrder;
+import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
@@ -42,6 +44,7 @@ public class InventoryService {
     private final EventService eventService;
     private final BranchRepository branchRepository;
     private final PurchaseOrderService purchaseOrderService;
+    private final PurchaseOrderRepository purchaseOrderRepository;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -203,29 +206,39 @@ public class InventoryService {
 
         Long warehouseId = ropList.get(0).getInventory().getBranch().getId();
         String warehouseName = ropList.get(0).getInventory().getBranch().getName();
-        List<PartDeltaDto> lackItems = new ArrayList<>();
+        Map<Inventory, Integer> orderMap = new HashMap<>();
 
         for (Rop rop : ropList) {
             Inventory inventory = rop.getInventory();
 
             if (inventory.getQuantity() <= rop.getRop()) {
-                Integer orderQuantity = inventory.getMaxStock() - inventory.getQuantity();
-
-                purchaseOrderService.makePurchaseOrder(inventory, orderQuantity);
-                lackItems.add(PartDeltaDto.builder()
-                        .id(inventory.getPart().getId())
-                        .delta(orderQuantity)
-                        .build());
+                int orderQuantity = inventory.getMaxStock() - inventory.getQuantity();
+                orderMap.put(inventory, orderQuantity);
             }
         }
-        if (lackItems.isEmpty()) return;
+        if (orderMap.isEmpty()) return;
 
-        OrderToFactoryDto event = OrderToFactoryDto.builder()
-                .warehouseId(warehouseId)
-                .warehouseName(warehouseName)
-                .items(lackItems)
-                .build();
-        eventService.setEventOutBox("order-to-factory-events", eventService.serializePayload(event));
+        Map<Inventory, Long> savedOrderMap = purchaseOrderService.createPurchaseOrders(orderMap);
+
+        for (Map.Entry<Inventory, Long> entry : savedOrderMap.entrySet()) {
+            Inventory inventory = entry.getKey();
+            Long partOrderId = entry.getValue();
+            int orderQuantity = orderMap.get(inventory);
+
+            OrderToFactoryDto event = OrderToFactoryDto.builder()
+                    .partOrderId(partOrderId)
+                    .warehouseId(warehouseId)
+                    .warehouseName(warehouseName)
+                    .items(List.of(
+                            PartDeltaDto.builder()
+                                    .id(inventory.getPart().getId())
+                                    .delta(orderQuantity)
+                                    .build()
+                    ))
+                    .build();
+
+            eventService.setEventOutBox("order-to-factory-events", eventService.serializePayload(event));
+        }
     }
 
     public boolean isStockAvailable(OrderReqDto orderReqDto) {

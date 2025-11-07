@@ -1,7 +1,7 @@
 package com.sampoom.backend.api.order.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
-import com.sampoom.backend.api.order.entity.OrderStatus;
+import com.sampoom.backend.api.order.entity.POStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class POResDto {
     private Integer restQuantity;
     private Integer price;
     private LocalDateTime createdAt;
-    private OrderStatus orderStatus;
+    private POStatus orderStatus;
 
     @QueryProjection
     public POResDto(String orderNumber,
@@ -39,7 +39,7 @@ public class POResDto {
                     Integer restQuantity,
                     Integer price,
                     LocalDateTime createdAt,
-                    OrderStatus orderStatus) {
+                    POStatus orderStatus) {
 
         this.orderNumber = orderNumber;
         this.partName = partName;

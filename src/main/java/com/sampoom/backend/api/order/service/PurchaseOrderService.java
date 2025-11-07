@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.order.service;
 
 import com.sampoom.backend.api.inventory.entity.Inventory;
+import com.sampoom.backend.api.order.dto.POEventPayload;
 import com.sampoom.backend.api.order.dto.POFilterDto;
 import com.sampoom.backend.api.order.dto.POResDto;
 import com.sampoom.backend.api.order.entity.PurchaseOrder;
@@ -21,12 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,14 +37,27 @@ public class PurchaseOrderService {
     private final PartGroupRepository partGroupRepository;
     private final PartRepository partRepository;
 
-    public void makePurchaseOrder(Inventory inventory, Integer quantity) {
-        PurchaseOrder purchaseOrder = PurchaseOrder.builder()
+    public PurchaseOrder makePurchaseOrder(Inventory inventory, Integer quantity) {
+        return PurchaseOrder.builder()
                 .orderNumber(this.makeOrderName())
                 .inventory(inventory)
                 .quantity(quantity)
                 .price(quantity * inventory.getPart().getStandardCost())
                 .build();
-        purchaseOrderRepository.save(purchaseOrder);
+    }
+
+    public Map<Inventory, Long> createPurchaseOrders(Map<Inventory, Integer> invMap) {
+        Map<Inventory, Long> purchaseOrderMap = new HashMap<>();
+        List<PurchaseOrder> orderList = new ArrayList<>();
+
+        for (Map.Entry<Inventory, Integer> entry : invMap.entrySet())
+            orderList.add(makePurchaseOrder(entry.getKey(), entry.getValue()));
+        List<PurchaseOrder> savedOrderList = purchaseOrderRepository.saveAll(orderList);
+
+        for (PurchaseOrder order : savedOrderList)
+            purchaseOrderMap.put(order.getInventory(), order.getId());
+
+        return purchaseOrderMap;
     }
 
     private String makeOrderName() {
@@ -106,5 +118,26 @@ public class PurchaseOrderService {
         }
 
         return poList;
+    }
+
+    public void updatePOStatus(POEventPayload poEventPayload) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(poEventPayload.getPartOrderId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage()));
+
+        purchaseOrder.setStatus(poEventPayload.getStatus());
+        purchaseOrder.setScheduledDate(
+                LocalDateTime.parse(poEventPayload.getScheduledDate(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        purchaseOrder.setDeleted(poEventPayload.getDeleted());
+        purchaseOrder.setProgressRate(poEventPayload.getProgressRate());
+        purchaseOrderRepository.save(purchaseOrder);
+    }
+
+    public void completePOStatus(POEventPayload poEventPayload) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(poEventPayload.getPartOrderId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage()));
+
+        purchaseOrder.setStatus(poEventPayload.getStatus());
+        purchaseOrder.setProgressRate(poEventPayload.getProgressRate());
+        purchaseOrderRepository.save(purchaseOrder);
     }
 }
