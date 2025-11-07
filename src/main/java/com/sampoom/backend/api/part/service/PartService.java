@@ -68,6 +68,7 @@ public class PartService {
         this.isNull(payload.getPartUnit());
         this.isNull(payload.getBaseQuantity());
         this.isNull(payload.getLeadTime());
+        this.isNull(payload.getStandardQuantity());
 
         Part part = Part.builder()
                 .id(payload.getPartId())
@@ -81,6 +82,7 @@ public class PartService {
                 .unit(payload.getPartUnit())
                 .safetyStock(payload.getBaseQuantity())
                 .standardCost(payload.getStandardCost())
+                .standardQuantity(payload.getStandardQuantity())
                 .build();
 
         partRepository.save(part);
@@ -102,6 +104,7 @@ public class PartService {
         part.setIsDeleted(payload.getDeleted());
         part.setGroupId(payload.getGroupId());
         part.setCategoryId(payload.getCategoryId());
+        part.setStandardQuantity(payload.getStandardQuantity());
         partRepository.save(part);
     }
 
