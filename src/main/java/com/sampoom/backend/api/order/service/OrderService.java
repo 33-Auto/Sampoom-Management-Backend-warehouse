@@ -8,6 +8,8 @@ import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.OrderStatus;
+import com.sampoom.backend.api.order.entity.PurchaseOrder;
+import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class OrderService {
     private final AWDistanceRepository distanceRepository;
     private final BranchRepository branchRepository;
     private final EventService eventService;
+    private final PurchaseOrderRepository purchaseOrderRepository;
 
     public void orderProcess(OrderReqDto orderReqDto) {
         // 창고 배정

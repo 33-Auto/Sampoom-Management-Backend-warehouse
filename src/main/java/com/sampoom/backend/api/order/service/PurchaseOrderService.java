@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.order.service;
 
 import com.sampoom.backend.api.inventory.entity.Inventory;
+import com.sampoom.backend.api.order.dto.POEventPayload;
 import com.sampoom.backend.api.order.dto.POFilterDto;
 import com.sampoom.backend.api.order.dto.POResDto;
 import com.sampoom.backend.api.order.entity.PurchaseOrder;
@@ -106,5 +107,25 @@ public class PurchaseOrderService {
         }
 
         return poList;
+    }
+
+    public void updatePOStatus(POEventPayload poEventPayload) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(poEventPayload.getPartOrderId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage()));
+
+        purchaseOrder.setStatus(poEventPayload.getStatus());
+        purchaseOrder.setScheduledDate(poEventPayload.getScheduledDate());
+        purchaseOrder.setDeleted(poEventPayload.getDeleted());
+        purchaseOrder.setProgressRate(poEventPayload.getProgressRate());
+        purchaseOrderRepository.save(purchaseOrder);
+    }
+
+    public void completePOStatus(POEventPayload poEventPayload) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(poEventPayload.getPartOrderId())
+                .orElseThrow(() -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage()));
+
+        purchaseOrder.setStatus(poEventPayload.getStatus());
+        purchaseOrder.setProgressRate(poEventPayload.getProgressRate());
+        purchaseOrderRepository.save(purchaseOrder);
     }
 }

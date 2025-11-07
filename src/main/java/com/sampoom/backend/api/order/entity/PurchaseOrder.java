@@ -3,13 +3,11 @@ package com.sampoom.backend.api.order.entity;
 import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,5 +30,15 @@ public class PurchaseOrder extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private OrderStatus status = OrderStatus.PENDING;
+    private POStatus status = POStatus.UNDER_REVIEW;
+
+    @Column(name = "scheduled_date")
+    private String scheduledDate;
+
+    @Column(name = "progress_rate")
+    @Builder.Default
+    private Double progressRate = 0.0;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 }

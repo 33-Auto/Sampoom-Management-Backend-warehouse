@@ -3,6 +3,7 @@ package com.sampoom.backend.api.order.controller;
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.dto.POFilterDto;
 import com.sampoom.backend.api.order.dto.POResDto;
+import com.sampoom.backend.api.order.entity.POStatus;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
@@ -23,7 +24,7 @@ public class PurchaseOrderController {
                                                                          @RequestParam(required = false) String keyword,
                                                                          @RequestParam(required = false) Long categoryId,
                                                                          @RequestParam(required = false) Long groupId,
-                                                                         @RequestParam(required = false) OrderStatus status,
+                                                                         @RequestParam(required = false) POStatus status,
                                                                          @RequestParam(defaultValue = "0") int page,
                                                                          @RequestParam(defaultValue = "20") int size) {
         POFilterDto poFilterDto = POFilterDto.builder()
