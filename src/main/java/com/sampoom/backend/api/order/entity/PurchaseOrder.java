@@ -5,6 +5,8 @@ import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -33,7 +35,7 @@ public class PurchaseOrder extends BaseTimeEntity {
     private POStatus status = POStatus.UNDER_REVIEW;
 
     @Column(name = "scheduled_date")
-    private String scheduledDate;
+    private LocalDateTime scheduledDate;
 
     @Column(name = "progress_rate")
     @Builder.Default

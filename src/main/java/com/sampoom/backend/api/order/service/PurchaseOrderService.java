@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -124,7 +125,8 @@ public class PurchaseOrderService {
                 .orElseThrow(() -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage()));
 
         purchaseOrder.setStatus(poEventPayload.getStatus());
-        purchaseOrder.setScheduledDate(poEventPayload.getScheduledDate());
+        purchaseOrder.setScheduledDate(
+                LocalDateTime.parse(poEventPayload.getScheduledDate(), DateTimeFormatter.ISO_DATE));
         purchaseOrder.setDeleted(poEventPayload.getDeleted());
         purchaseOrder.setProgressRate(poEventPayload.getProgressRate());
         purchaseOrderRepository.save(purchaseOrder);
