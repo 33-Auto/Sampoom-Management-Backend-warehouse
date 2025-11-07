@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderToFactoryDto {
-    private Long orderPartId;
+    private Long partOrderId;
     private Long  warehouseId;
     private String warehouseName;
     List<PartDeltaDto> items;

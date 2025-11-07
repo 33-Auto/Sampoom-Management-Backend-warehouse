@@ -24,10 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,14 +36,27 @@ public class PurchaseOrderService {
     private final PartGroupRepository partGroupRepository;
     private final PartRepository partRepository;
 
-    public void makePurchaseOrder(Inventory inventory, Integer quantity) {
-        PurchaseOrder purchaseOrder = PurchaseOrder.builder()
+    public PurchaseOrder makePurchaseOrder(Inventory inventory, Integer quantity) {
+        return PurchaseOrder.builder()
                 .orderNumber(this.makeOrderName())
                 .inventory(inventory)
                 .quantity(quantity)
                 .price(quantity * inventory.getPart().getStandardCost())
                 .build();
-        purchaseOrderRepository.save(purchaseOrder);
+    }
+
+    public Map<Inventory, Long> createPurchaseOrders(Map<Inventory, Integer> invMap) {
+        Map<Inventory, Long> purchaseOrderMap = new HashMap<>();
+        List<PurchaseOrder> orderList = new ArrayList<>();
+
+        for (Map.Entry<Inventory, Integer> entry : invMap.entrySet())
+            orderList.add(makePurchaseOrder(entry.getKey(), entry.getValue()));
+        List<PurchaseOrder> savedOrderList = purchaseOrderRepository.saveAll(orderList);
+
+        for (PurchaseOrder order : savedOrderList)
+            purchaseOrderMap.put(order.getInventory(), order.getId());
+
+        return purchaseOrderMap;
     }
 
     private String makeOrderName() {
