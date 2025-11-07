@@ -126,7 +126,7 @@ public class PurchaseOrderService {
 
         purchaseOrder.setStatus(poEventPayload.getStatus());
         purchaseOrder.setScheduledDate(
-                LocalDateTime.parse(poEventPayload.getScheduledDate(), DateTimeFormatter.ISO_DATE));
+                LocalDateTime.parse(poEventPayload.getScheduledDate(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         purchaseOrder.setDeleted(poEventPayload.getDeleted());
         purchaseOrder.setProgressRate(poEventPayload.getProgressRate());
         purchaseOrderRepository.save(purchaseOrder);
