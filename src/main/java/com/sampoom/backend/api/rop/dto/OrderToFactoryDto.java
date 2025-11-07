@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -17,5 +18,6 @@ public class OrderToFactoryDto {
     private Long partOrderId;
     private Long  warehouseId;
     private String warehouseName;
+    private LocalDateTime requiredDate;
     List<PartDeltaDto> items;
 }

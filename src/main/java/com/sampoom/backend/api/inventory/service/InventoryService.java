@@ -8,7 +8,6 @@ import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.entity.POStatus;
-import com.sampoom.backend.api.order.entity.PurchaseOrder;
 import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.api.part.entity.Category;
@@ -32,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -232,6 +232,7 @@ public class InventoryService {
                     .partOrderId(partOrderId)
                     .warehouseId(warehouseId)
                     .warehouseName(warehouseName)
+                    .requiredDate(LocalDateTime.now().plusDays(inventory.getPart().getLeadTime()))
                     .items(List.of(
                             PartDeltaDto.builder()
                                     .id(inventory.getPart().getId())
