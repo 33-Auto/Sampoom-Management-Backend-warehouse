@@ -15,6 +15,7 @@ public class POResDto {
     private String orderNumber;
     private String categoryName;
     private String groupName;
+    private Long partId;
     private String partName;
     private String partCode;
     private Integer currQuantity;
@@ -29,6 +30,7 @@ public class POResDto {
 
     @QueryProjection
     public POResDto(String orderNumber,
+                    Long partId,
                     String partName,
                     String partCode,
                     Integer currQuantity,
@@ -42,6 +44,7 @@ public class POResDto {
                     POStatus orderStatus) {
 
         this.orderNumber = orderNumber;
+        this.partId = partId;
         this.partName = partName;
         this.partCode = partCode;
         this.currQuantity = currQuantity;
