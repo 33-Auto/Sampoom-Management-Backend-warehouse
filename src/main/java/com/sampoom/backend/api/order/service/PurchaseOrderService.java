@@ -87,7 +87,7 @@ public class PurchaseOrderService {
         PurchaseOrder purchaseOrder = purchaseOrderRepository.findWithInventoryById(purchaseOrderId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage())
         );
-        Rop rop = ropRepository.findByInventory_Id(purchaseOrder.getInventory().etId()).orElseThrow(
+        Rop rop = ropRepository.findByInventory_Id(purchaseOrder.getInventory().getId()).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage())
         );
 
