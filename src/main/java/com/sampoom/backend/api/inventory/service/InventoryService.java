@@ -11,6 +11,7 @@ import com.sampoom.backend.api.order.entity.POStatus;
 import com.sampoom.backend.api.order.entity.PurchaseOrder;
 import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
+import com.sampoom.backend.api.part.dto.Event;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
@@ -313,5 +314,24 @@ public class InventoryService {
         }
 
         return inventoryRepository.findPartBrief(warehouseId, partIds);
+    }
+
+    @Transactional
+    public <T> void attachStocksToForecast(Event<T> event) {
+        if (event.getPayload() instanceof ForecastPayload payload) {
+            Long warehouseId = payload.getWarehouseId();
+            Long partId = payload.getPartId();
+
+            if (warehouseId == null || partId == null)
+                throw new BadRequestException(ErrorStatus.PAYLOAD_NULL.getMessage());
+
+            Inventory inventory = inventoryRepository.findByBranch_IdAndPart_Id(warehouseId, partId).orElseThrow(
+                    () -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage())
+            );
+
+            payload.setStock(inventory.getQuantity());
+            eventService.setEventOutBox("part-forecast-events", eventService.serializePayload(event));
+        } else
+            throw new BadRequestException(ErrorStatus.INVALID_PAYLOAD_TYPE.getMessage());
     }
 }
