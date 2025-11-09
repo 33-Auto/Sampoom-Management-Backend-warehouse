@@ -26,24 +26,18 @@ public class EventPublisher {
         pendingEvents.addAll(retryEvents);
 
         for (EventOutbox event : pendingEvents) {
-            try {
-                kafkaTemplate.send(event.getTopic(), event.getPayload())
-                        .thenAccept(result -> {
-                            event.setStatus(EventStatus.PUBLISHED);
-                            eventOutboxRepository.save(event);
-                            log.info("✅ Sent outbox event: {}", event.getId());
-                        })
-                        .exceptionally(ex -> {
-                            event.setStatus(EventStatus.FAILED);
-                            eventOutboxRepository.save(event);
-                            log.error("❌ Failed to send outbox event: {}", event.getId(), ex);
-                            return null;
-                        });
-            } catch (Exception e) {
-                event.setStatus(EventStatus.FAILED);
-                eventOutboxRepository.save(event);
-                log.error("❌ Failed to serialize event: {}", event.getId(), e);
-            }
+            kafkaTemplate.send(event.getTopic(), event.getPayload())
+                    .thenAccept(result -> {
+                        event.setStatus(EventStatus.PUBLISHED);
+                        eventOutboxRepository.save(event);
+                        log.info("✅ Sent outbox event: {}", event.getId());
+                    })
+                    .exceptionally(ex -> {
+                        event.setStatus(EventStatus.FAILED);
+                        eventOutboxRepository.save(event);
+                        log.error("❌ Failed to send outbox event: {}", event.getId(), ex);
+                        return null;
+                    });
         }
     }
 }
