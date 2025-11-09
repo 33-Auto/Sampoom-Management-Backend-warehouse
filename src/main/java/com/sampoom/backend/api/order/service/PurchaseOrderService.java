@@ -12,6 +12,8 @@ import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
 import com.sampoom.backend.api.part.repository.PartGroupRepository;
 import com.sampoom.backend.api.part.repository.PartRepository;
+import com.sampoom.backend.api.rop.entity.Rop;
+import com.sampoom.backend.api.rop.repository.RopRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +39,7 @@ public class PurchaseOrderService {
     private final CategoryRepository categoryRepository;
     private final PartGroupRepository partGroupRepository;
     private final PartRepository partRepository;
+    private final RopRepository ropRepository;
 
     public PurchaseOrder makePurchaseOrder(Inventory inventory, Integer quantity) {
         return PurchaseOrder.builder()
@@ -76,6 +80,52 @@ public class PurchaseOrderService {
                 poPage.getPageable(),
                 poPage.getTotalElements()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public POResDto getPurchaseOrder(Long purchaseOrderId) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findWithInventoryById(purchaseOrderId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage())
+        );
+        Rop rop = ropRepository.findByInventory_Id(purchaseOrder.getInventory().getId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage())
+        );
+
+        Integer inboundQuantity = purchaseOrder.getInboundQuantity() != null ? purchaseOrder.getInboundQuantity() : 0;
+
+        POResDto poResDto = POResDto.builder()
+                .purchaseOrderId(purchaseOrderId)
+                .orderNumber(purchaseOrder.getOrderNumber())
+                .partId(purchaseOrder.getInventory().getPart().getId())
+                .partCode(purchaseOrder.getInventory().getPart().getCode())
+                .partName(purchaseOrder.getInventory().getPart().getName())
+                .currQuantity(purchaseOrder.getInventory().getQuantity())
+                .rop(rop.getRop())
+                .unit(purchaseOrder.getInventory().getPart().getUnit())
+                .orderQuantity(purchaseOrder.getQuantity())
+                .inboundQuantity(purchaseOrder.getInboundQuantity())
+                .restQuantity(purchaseOrder.getQuantity() - inboundQuantity)
+                .price(purchaseOrder.getPrice())
+                .scheduledDate(purchaseOrder.getScheduledDate())
+                .receivedDate(purchaseOrder.getReceivedDate())
+                .createdAt(purchaseOrder.getCreatedAt())
+                .orderStatus(purchaseOrder.getStatus())
+                .build();
+        this.attachName(poResDto, purchaseOrder.getInventory().getPart());
+
+        return poResDto;
+    }
+
+    private void attachName(POResDto poResDto, Part part) {
+        Category category = categoryRepository.findById(part.getCategoryId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage())
+        );
+        PartGroup group = partGroupRepository.findById(part.getGroupId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.GROUP_NOT_FOUND.getMessage())
+        );
+
+        poResDto.setCategoryName(category.getName());
+        poResDto.setGroupName(group.getName());
     }
 
     private List<POResDto> attachNames(Page<POResDto> poPage) {

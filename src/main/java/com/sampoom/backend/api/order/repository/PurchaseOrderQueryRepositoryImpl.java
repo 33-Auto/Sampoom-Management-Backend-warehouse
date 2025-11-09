@@ -7,9 +7,7 @@ import com.sampoom.backend.api.order.dto.POFilterDto;
 import com.sampoom.backend.api.order.dto.POResDto;
 import com.sampoom.backend.api.order.dto.QPOResDto;
 import com.sampoom.backend.api.order.entity.QPurchaseOrder;
-import com.sampoom.backend.api.part.entity.QCategory;
 import com.sampoom.backend.api.part.entity.QPart;
-import com.sampoom.backend.api.part.entity.QPartGroup;
 import com.sampoom.backend.api.rop.entity.QRop;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,6 +54,7 @@ public class PurchaseOrderQueryRepositoryImpl implements PurchaseOrderQueryRepos
 
         List<POResDto> content = queryFactory
                 .select(new QPOResDto(
+                        po.id,
                         po.orderNumber,
                         part.id,
                         part.name,
@@ -67,6 +66,8 @@ public class PurchaseOrderQueryRepositoryImpl implements PurchaseOrderQueryRepos
                         po.inboundQuantity,
                         po.quantity.subtract(po.inboundQuantity),
                         po.price,
+                        po.scheduledDate,
+                        po.receivedDate,
                         po.createdAt,
                         po.status
                 ))

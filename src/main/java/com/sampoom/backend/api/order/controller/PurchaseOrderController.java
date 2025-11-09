@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,5 +36,10 @@ public class PurchaseOrderController {
                 .status(status)
                 .build();
         return ApiResponse.success(SuccessStatus.OK, purchaseOrderService.getPurchaseOrders(poFilterDto, page, size));
+    }
+
+    @GetMapping("/po/{purchaseOrderId}")
+    public ResponseEntity<ApiResponse<POResDto>> getPurchaseOrder(@PathVariable Long purchaseOrderId) {
+        return ApiResponse.success(SuccessStatus.OK, purchaseOrderService.getPurchaseOrder(purchaseOrderId));
     }
 }

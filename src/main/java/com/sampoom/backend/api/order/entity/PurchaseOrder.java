@@ -37,6 +37,9 @@ public class PurchaseOrder extends BaseTimeEntity {
     @Column(name = "scheduled_date")
     private LocalDateTime scheduledDate;
 
+    @Column(name = "received_date")
+    private LocalDateTime receivedDate;
+
     @Column(name = "progress_rate")
     @Builder.Default
     private Double progressRate = 0.0;

@@ -8,6 +8,7 @@ import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.entity.POStatus;
+import com.sampoom.backend.api.order.entity.PurchaseOrder;
 import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.api.part.entity.Category;
@@ -102,6 +103,7 @@ public class InventoryService {
 
         this.validateInBound(partUpdateReqDto);
         this.updateParts(partUpdateReqDto, inventoryMap);
+        this.saveReceivedDate(partUpdateReqDto.getPurchaseOrderId());
     }
 
     private void validateInBound(PartUpdateReqDto partUpdateReqDto) {
@@ -162,6 +164,16 @@ public class InventoryService {
         params.forEach(query::setParameter);
 
         query.executeUpdate();
+    }
+
+    @Transactional
+    protected void saveReceivedDate(Long purchaseOrderId) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseOrderId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage())
+        );
+
+        purchaseOrder.setReceivedDate(LocalDateTime.now());
+        purchaseOrderRepository.save(purchaseOrder);
     }
 
     @Transactional
