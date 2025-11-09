@@ -103,7 +103,7 @@ public class InventoryService {
 
         this.validateInBound(partUpdateReqDto);
         this.updateParts(partUpdateReqDto, inventoryMap);
-        this.saveReceivedDate(partUpdateReqDto.getPurchaseOrderId());
+        this.saveReceivedDateAndInboundQuantity(partUpdateReqDto);
     }
 
     private void validateInBound(PartUpdateReqDto partUpdateReqDto) {
@@ -167,11 +167,13 @@ public class InventoryService {
     }
 
     @Transactional
-    protected void saveReceivedDate(Long purchaseOrderId) {
-        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseOrderId).orElseThrow(
+    protected void saveReceivedDateAndInboundQuantity(PartUpdateReqDto dto) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(dto.getPurchaseOrderId()).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage())
         );
+        Integer totalInboundQuantity = purchaseOrder.getInboundQuantity() + dto.getItems().get(0).getDelta();
 
+        purchaseOrder.setInboundQuantity(totalInboundQuantity);
         purchaseOrder.setReceivedDate(LocalDateTime.now());
         purchaseOrderRepository.save(purchaseOrder);
     }
