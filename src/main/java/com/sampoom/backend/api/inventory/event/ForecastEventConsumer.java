@@ -20,7 +20,6 @@ public class ForecastEventConsumer {
     private final ObjectMapper objectMapper;
     private final InventoryService inventoryService;
 
-    @Transactional
     @KafkaListener(topics = "part-forecast")
     public void consume(String message) {
         try {

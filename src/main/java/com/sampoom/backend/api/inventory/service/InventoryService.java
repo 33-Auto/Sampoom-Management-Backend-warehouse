@@ -316,7 +316,7 @@ public class InventoryService {
         return inventoryRepository.findPartBrief(warehouseId, partIds);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public <T> void attachStocksToForecast(Event<T> event) {
         if (event.getPayload() instanceof ForecastPayload payload) {
             Long warehouseId = payload.getWarehouseId();
