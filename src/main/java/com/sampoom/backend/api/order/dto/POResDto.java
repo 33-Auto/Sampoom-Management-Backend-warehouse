@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Setter
 public class POResDto {
+    private Long purchaseOrderId;
     private String orderNumber;
     private String categoryName;
     private String groupName;
@@ -25,11 +26,14 @@ public class POResDto {
     private Integer inboundQuantity;
     private Integer restQuantity;
     private Integer price;
+    private LocalDateTime scheduledDate;
+    private LocalDateTime receivedDate;
     private LocalDateTime createdAt;
     private POStatus orderStatus;
 
     @QueryProjection
-    public POResDto(String orderNumber,
+    public POResDto(Long purchaseOrderId,
+                    String orderNumber,
                     Long partId,
                     String partName,
                     String partCode,
@@ -40,9 +44,11 @@ public class POResDto {
                     Integer inboundQuantity,
                     Integer restQuantity,
                     Integer price,
+                    LocalDateTime scheduledDate,
+                    LocalDateTime receivedDate,
                     LocalDateTime createdAt,
                     POStatus orderStatus) {
-
+        this.purchaseOrderId = purchaseOrderId;
         this.orderNumber = orderNumber;
         this.partId = partId;
         this.partName = partName;
@@ -54,6 +60,8 @@ public class POResDto {
         this.inboundQuantity = inboundQuantity;
         this.restQuantity = restQuantity;
         this.price = price;
+        this.scheduledDate = scheduledDate;
+        this.receivedDate = receivedDate;
         this.createdAt = createdAt;
         this.orderStatus = orderStatus;
     }
