@@ -29,6 +29,7 @@ public enum ErrorStatus {
 
     POSITIVE_DELTA(HttpStatus.BAD_REQUEST, "변화량이 양수입니다."),
     NEGATIVE_DELTA(HttpStatus.BAD_REQUEST, "변화량이 음수입니다."),
+    INVALID_PAYLOAD_TYPE(HttpStatus.BAD_REQUEST, "부정확한 이벤트 페이로드입니다."),
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
