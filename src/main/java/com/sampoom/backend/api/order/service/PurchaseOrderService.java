@@ -91,6 +91,8 @@ public class PurchaseOrderService {
                 () -> new NotFoundException(ErrorStatus.ROP_NOT_FOUND.getMessage())
         );
 
+        Integer inboundQuantity = purchaseOrder.getInboundQuantity() != null ? purchaseOrder.getInboundQuantity() : 0;
+
         POResDto poResDto = POResDto.builder()
                 .purchaseOrderId(purchaseOrderId)
                 .orderNumber(purchaseOrder.getOrderNumber())
@@ -102,7 +104,7 @@ public class PurchaseOrderService {
                 .unit(purchaseOrder.getInventory().getPart().getUnit())
                 .orderQuantity(purchaseOrder.getQuantity())
                 .inboundQuantity(purchaseOrder.getInboundQuantity())
-                .restQuantity(purchaseOrder.getQuantity() - purchaseOrder.getInboundQuantity())
+                .restQuantity(purchaseOrder.getQuantity() - inboundQuantity)
                 .price(purchaseOrder.getPrice())
                 .scheduledDate(purchaseOrder.getScheduledDate())
                 .receivedDate(purchaseOrder.getReceivedDate())
