@@ -57,6 +57,7 @@ public class PurchaseOrderQueryRepositoryImpl implements PurchaseOrderQueryRepos
         List<POResDto> content = queryFactory
                 .select(new QPOResDto(
                         po.orderNumber,
+                        part.id,
                         part.name,
                         part.code,
                         inventory.quantity,
