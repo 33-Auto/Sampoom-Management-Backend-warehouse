@@ -321,6 +321,10 @@ public class InventoryService {
         if (event.getPayload() instanceof ForecastPayload payload) {
             Long warehouseId = payload.getWarehouseId();
             Long partId = payload.getPartId();
+
+            if (warehouseId == null || partId == null)
+                throw new BadRequestException(ErrorStatus.PAYLOAD_NULL.getMessage());
+
             Inventory inventory = inventoryRepository.findByBranch_IdAndPart_Id(warehouseId, partId).orElseThrow(
                     () -> new NotFoundException(ErrorStatus.INVENTORY_NOT_FOUND.getMessage())
             );
