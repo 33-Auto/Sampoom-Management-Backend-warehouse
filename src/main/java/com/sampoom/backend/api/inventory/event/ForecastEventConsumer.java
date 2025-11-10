@@ -2,15 +2,13 @@ package com.sampoom.backend.api.inventory.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sampoom.backend.api.inventory.dto.ForecastPayload;
 import com.sampoom.backend.api.inventory.service.InventoryService;
-import com.sampoom.backend.api.part.dto.Event;
-import com.sampoom.backend.api.part.event.EventPayloadMapper;
+import com.sampoom.backend.api.event.entity.Event;
+import com.sampoom.backend.api.event.service.EventPayloadMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

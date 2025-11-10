@@ -1,8 +1,6 @@
-package com.sampoom.backend.api.part.dto;
+package com.sampoom.backend.api.event.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;

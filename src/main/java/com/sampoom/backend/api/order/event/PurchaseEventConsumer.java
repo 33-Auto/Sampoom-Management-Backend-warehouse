@@ -5,8 +5,8 @@
 //import com.sampoom.backend.api.order.dto.POEventPayload;
 //import com.sampoom.backend.api.order.service.OrderService;
 //import com.sampoom.backend.api.order.service.PurchaseOrderService;
-//import com.sampoom.backend.api.part.dto.Event;
-//import com.sampoom.backend.api.part.event.EventPayloadMapper;
+//import com.sampoom.backend.api.event.entity.Event;
+//import com.sampoom.backend.api.event.service.EventPayloadMapper;
 //import lombok.RequiredArgsConstructor;
 //import lombok.extern.slf4j.Slf4j;
 //import org.springframework.kafka.annotation.KafkaListener;

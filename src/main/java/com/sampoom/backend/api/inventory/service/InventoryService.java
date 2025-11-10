@@ -11,7 +11,7 @@ import com.sampoom.backend.api.order.entity.POStatus;
 import com.sampoom.backend.api.order.entity.PurchaseOrder;
 import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
-import com.sampoom.backend.api.part.dto.Event;
+import com.sampoom.backend.api.event.entity.Event;
 import com.sampoom.backend.api.part.entity.Category;
 import com.sampoom.backend.api.part.entity.PartGroup;
 import com.sampoom.backend.api.part.repository.CategoryRepository;
@@ -213,7 +213,7 @@ public class InventoryService {
     public void checkRop(DeliveryReqDto deliveryReqDto) {
         List<Long> partIds = deliveryReqDto.getItems().stream().map(PartDeltaDto::getId).toList();
 
-        List<Rop> ropList = ropRepository.findWithInventoryByAutoOrderStatusAndBranch_IdAndPart_IdIn(
+        List<Rop> ropList = ropRepository.findActiveRopExcludingComplexParts(
                 Status.ACTIVE,
                 deliveryReqDto.getWarehouseId(),
                 partIds
