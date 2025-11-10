@@ -16,7 +16,7 @@ public class Bom {
     @Id
     private Long id;
 
-    @Column(name = "part_id", nullable = false)
+    @Column(name = "part_id", nullable = false, unique = true)
     private Long partId;
 
     @Column(nullable = false)
@@ -25,5 +25,6 @@ public class Bom {
     @Column(nullable = false)
     private Status status;
 
-    private boolean deleted;
+    @Column(nullable = false)
+    private Boolean deleted;
 }
