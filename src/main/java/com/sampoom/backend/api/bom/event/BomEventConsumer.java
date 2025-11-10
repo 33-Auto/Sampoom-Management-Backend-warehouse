@@ -31,7 +31,7 @@ public class BomEventConsumer {
                 return;
             }
 
-            Event<?> event = eventService.getEventFromType(eventType, message);
+            Event<?> event = eventService.getEventFromType(message, eventType);
             if (event == null) {
                 log.info("⚠️ Unknown event type, skipping: {}", eventType);
                 return;

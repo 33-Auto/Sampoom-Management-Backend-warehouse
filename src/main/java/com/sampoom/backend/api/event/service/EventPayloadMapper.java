@@ -27,6 +27,7 @@ public class EventPayloadMapper {
         registry.put("BranchCreated", BranchPayload.class);
         registry.put("DistanceCalculated", DistancePayload.class);
 
+        registry.put("PartOrderCreated", POEventPayload.class);
         registry.put("PartOrderStatusChanged", POEventPayload.class);
         registry.put("PartOrderCompleted", POEventPayload.class);
 

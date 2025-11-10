@@ -10,10 +10,12 @@ import com.sampoom.backend.api.event.repository.EventOutboxRepository;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventService {
     private final EventOutboxRepository eventOutboxRepository;
     private final ObjectMapper objectMapper;
@@ -37,7 +39,7 @@ public class EventService {
     }
 
     public String getEventType(JsonNode jsonNode) {
-        if (jsonNode == null || jsonNode.isEmpty())
+        if (jsonNode == null)
             return null;
 
         String eventType = jsonNode.asText();
@@ -49,8 +51,10 @@ public class EventService {
 
     public Event<?> getEventFromType(String message, String eventType) throws JsonProcessingException {
         Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
-        if (payloadClass == null)
+        if (payloadClass == null) {
+            log.error("Could not find payload class for event type {}", eventType);
             return null;
+        }
 
         return objectMapper.readValue(
                 message,

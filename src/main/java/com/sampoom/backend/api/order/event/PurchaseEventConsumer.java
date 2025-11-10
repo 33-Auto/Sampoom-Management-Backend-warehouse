@@ -23,13 +23,14 @@ public class PurchaseEventConsumer {
     public void consumer(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
+
             String eventType = eventService.getEventType(root.get("eventType"));
             if (eventType == null || eventType.isEmpty()) {
                 log.info("❌ Missing eventType in message: {}", message);
                 return;
             }
 
-            Event<?> event = eventService.getEventFromType(eventType, message);
+            Event<?> event = eventService.getEventFromType(message, eventType);
             if (event == null) {
                 log.info("⚠️ Unknown event type, skipping: {}", eventType);
                 return;
