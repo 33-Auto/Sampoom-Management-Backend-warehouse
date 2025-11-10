@@ -44,7 +44,7 @@ public class BranchEventConsumer {
             if ("BranchCreated".equals(eventType)) {
                 BranchPayload payload = (BranchPayload) event.getPayload();
                 branchService.createBranch(payload);
-                log.info("✅ partCreated saved: {}", payload.getBranchName());
+                log.info("✅ branchCreated saved: {}", payload.getBranchName());
             }
             else if ("DistanceCalculated".equals(eventType)) {
                 DistancePayload payload = (DistancePayload) event.getPayload();
