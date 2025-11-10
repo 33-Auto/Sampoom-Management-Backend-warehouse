@@ -3,7 +3,7 @@ package com.sampoom.backend.api.part.event;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.event.entity.Event;
-import com.sampoom.backend.api.event.service.EventPayloadMapper;
+import com.sampoom.backend.api.event.service.EventService;
 import com.sampoom.backend.api.part.dto.PartCategoryPayload;
 import com.sampoom.backend.api.part.dto.PartGroupPayload;
 import com.sampoom.backend.api.part.dto.PartPayload;
@@ -19,40 +19,48 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PartEventConsumer {
     private final ObjectMapper objectMapper;
-    private final EventPayloadMapper eventPayloadMapper;
     private final PartService partService;
+    private final EventService eventService;
 
     @Transactional
     @KafkaListener(topics = {"part-events", "part-group-events", "part-category-events"})
     public void consume(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
-            String eventType = root.get("eventType").asText();
-            Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
-            Event<?> event = objectMapper.readValue(
-                    message,
-                    objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
-            );
-
-            if ("PartCreated".equals(eventType)) {
-                PartPayload payload = (PartPayload) event.getPayload();
-                partService.createPart(payload);
-                log.info("✅ partCreated saved: {}", payload.getName());
+            String eventType = eventService.getEventType(root.get("eventType"));
+            if (eventType == null || eventType.isEmpty()) {
+                log.info("❌ Missing eventType in message: {}", message);
+                return;
             }
-            else if ("PartUpdated".equals(eventType)) {
-                PartPayload payload = (PartPayload) event.getPayload();
-                partService.updatePart(payload);
-                log.info("✅ partUpdated saved: {}", payload.getName());
 
+            Event<?> event = eventService.getEventFromType(eventType, message);
+            if (event == null) {
+                log.info("⚠️ Unknown event type, skipping: {}", eventType);
+                return;
             }
-            else if ("PartGroupCreated".equals(eventType)) {
-                PartGroupPayload payload = (PartGroupPayload) event.getPayload();
-                partService.createPartGroup(payload);
-                log.info("✅ partGroupCreated saved: {}", payload.getGroupName());
-            } else if ("PartCategoryCreated".equals(eventType)) {
-                PartCategoryPayload payload = (PartCategoryPayload) event.getPayload();
-                partService.createPartCategory(payload);
-                log.info("✅ PartCategoryCreated saved: {}", payload.getCategoryName());
+
+            switch (eventType) {
+                case "PartCreated" -> {
+                    PartPayload payload = (PartPayload) event.getPayload();
+                    partService.createPart(payload);
+                    log.info("✅ partCreated saved: {}", payload.getName());
+                }
+                case "PartUpdated" -> {
+                    PartPayload payload = (PartPayload) event.getPayload();
+                    partService.updatePart(payload);
+                    log.info("✅ partUpdated saved: {}", payload.getName());
+
+                }
+                case "PartGroupCreated" -> {
+                    PartGroupPayload payload = (PartGroupPayload) event.getPayload();
+                    partService.createPartGroup(payload);
+                    log.info("✅ partGroupCreated saved: {}", payload.getGroupName());
+                }
+                case "PartCategoryCreated" -> {
+                    PartCategoryPayload payload = (PartCategoryPayload) event.getPayload();
+                    partService.createPartCategory(payload);
+                    log.info("✅ PartCategoryCreated saved: {}", payload.getCategoryName());
+                }
             }
 
         } catch (Exception e) {

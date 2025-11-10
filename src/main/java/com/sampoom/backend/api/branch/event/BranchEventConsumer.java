@@ -8,6 +8,7 @@ import com.sampoom.backend.api.branch.service.BranchService;
 import com.sampoom.backend.api.branch.service.DistanceService;
 import com.sampoom.backend.api.event.entity.Event;
 import com.sampoom.backend.api.event.service.EventPayloadMapper;
+import com.sampoom.backend.api.event.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class BranchEventConsumer {
     private final ObjectMapper objectMapper;
-    private final EventPayloadMapper eventPayloadMapper;
+    private final EventService eventService;
     private final BranchService branchService;
     private final DistanceService distanceService;
 
@@ -28,12 +29,17 @@ public class BranchEventConsumer {
     public void consume(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
-            String eventType = root.get("eventType").asText();
-            Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
-            Event<?> event = objectMapper.readValue(
-                    message,
-                    objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
-            );
+            String eventType = eventService.getEventType(root.get("eventType"));
+            if (eventType == null || eventType.isEmpty()) {
+                log.info("❌ Missing eventType in message: {}", message);
+                return;
+            }
+
+            Event<?> event = eventService.getEventFromType(eventType, message);
+            if (event == null) {
+                log.info("⚠️ Unknown event type, skipping: {}", eventType);
+                return;
+            }
 
             if ("BranchCreated".equals(eventType)) {
                 BranchPayload payload = (BranchPayload) event.getPayload();
