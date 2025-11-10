@@ -36,6 +36,9 @@ public class OrderService {
             log.error("Allocated Warehouse not found");
             return;
         }
+        log.info("allocatedBranch class: {}", allocatedBranch.getClass());
+        log.info("allocatedBranch id: {}, name: {}", allocatedBranch.getId(), allocatedBranch.getName());
+
         setOrderWarehouseEvent(orderReqDto.getOrderId(), allocatedBranch);
 
         log.info("allocated Warehouse event: orderId={}", orderReqDto.getOrderId());

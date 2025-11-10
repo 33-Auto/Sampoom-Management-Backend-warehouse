@@ -34,6 +34,7 @@ public class EventService {
         try {
             return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
+            log.error("Error while serializing payload: {}", e.getMessage());
             throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage());
         }
     }
