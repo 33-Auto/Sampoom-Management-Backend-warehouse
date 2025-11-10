@@ -21,4 +21,6 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
             WHERE po.id = :id
     """)
     Optional<PurchaseOrder> findWithInventoryById(@Param("id") Long id);
+
+    PurchaseOrder findPurchaseOrderById(@Param("id") Long id);
 }

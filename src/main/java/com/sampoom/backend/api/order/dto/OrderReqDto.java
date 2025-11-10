@@ -19,8 +19,9 @@ public class OrderReqDto {
     @NotBlank(message = "주문 아이디가 없습니다.")
     private Long orderId;
 
-    @NotBlank(message = "주문 지점 정보는 필수입니다")
-    private Long branchId;
+    @NotBlank(message = "주문 지점 아이디는 필수입니다.")
+    private Long agencyId;
+    private String agencyName;
 
     @NotEmpty(message = "주문 항목은 최소 1개 이상이어야 합니다")
     @Valid

@@ -17,6 +17,7 @@ import com.sampoom.backend.api.rop.repository.RopRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PurchaseOrderService {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final CategoryRepository categoryRepository;
@@ -171,8 +173,12 @@ public class PurchaseOrderService {
     }
 
     public void updatePOStatus(POEventPayload poEventPayload) {
-        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(poEventPayload.getPartOrderId())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage()));
+        if (!purchaseOrderRepository.existsById(poEventPayload.getPartOrderId())) {
+            log.error(ErrorStatus.PO_NOT_FOUND.getMessage(), poEventPayload.getPartOrderId());
+            return;
+        }
+
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findPurchaseOrderById(poEventPayload.getPartOrderId());
 
         purchaseOrder.setStatus(poEventPayload.getStatus());
         purchaseOrder.setScheduledDate(
@@ -183,8 +189,12 @@ public class PurchaseOrderService {
     }
 
     public void completePOStatus(POEventPayload poEventPayload) {
-        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(poEventPayload.getPartOrderId())
-                .orElseThrow(() -> new NotFoundException(ErrorStatus.PO_NOT_FOUND.getMessage()));
+        if (!purchaseOrderRepository.existsById(poEventPayload.getPartOrderId())) {
+            log.error(ErrorStatus.PO_NOT_FOUND.getMessage(), poEventPayload.getPartOrderId());
+            return;
+        }
+
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findPurchaseOrderById(poEventPayload.getPartOrderId());
 
         purchaseOrder.setStatus(poEventPayload.getStatus());
         purchaseOrder.setProgressRate(poEventPayload.getProgressRate());

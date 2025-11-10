@@ -19,7 +19,7 @@ public class SalesEventConsumer {
     public void consumer(String message) {
         try {
             OrderReqDto orderReqDto = objectMapper.readValue(message, OrderReqDto.class);
-
+            log.info("sales-event received: {}", orderReqDto);
             orderService.orderProcess(orderReqDto);
             log.info("✅ Received OrderCreatedEvent: orderId={}, items={}", orderReqDto.getOrderId(), orderReqDto.getItems().size());
         } catch (Exception e) {

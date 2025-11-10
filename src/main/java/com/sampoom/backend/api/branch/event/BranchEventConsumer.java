@@ -6,8 +6,9 @@ import com.sampoom.backend.api.branch.dto.BranchPayload;
 import com.sampoom.backend.api.branch.dto.DistancePayload;
 import com.sampoom.backend.api.branch.service.BranchService;
 import com.sampoom.backend.api.branch.service.DistanceService;
-import com.sampoom.backend.api.part.dto.Event;
-import com.sampoom.backend.api.part.event.EventPayloadMapper;
+import com.sampoom.backend.api.event.entity.Event;
+import com.sampoom.backend.api.event.service.EventPayloadMapper;
+import com.sampoom.backend.api.event.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class BranchEventConsumer {
     private final ObjectMapper objectMapper;
-    private final EventPayloadMapper eventPayloadMapper;
+    private final EventService eventService;
     private final BranchService branchService;
     private final DistanceService distanceService;
 
@@ -28,17 +29,22 @@ public class BranchEventConsumer {
     public void consume(String message) {
         try {
             JsonNode root = objectMapper.readTree(message);
-            String eventType = root.get("eventType").asText();
-            Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
-            Event<?> event = objectMapper.readValue(
-                    message,
-                    objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
-            );
+            String eventType = eventService.getEventType(root.get("eventType"));
+            if (eventType == null || eventType.isEmpty()) {
+                log.info("❌ Missing eventType in message: {}", message);
+                return;
+            }
+
+            Event<?> event = eventService.getEventFromType(message, eventType);
+            if (event == null) {
+                log.info("⚠️ Unknown event type, skipping: {}", eventType);
+                return;
+            }
 
             if ("BranchCreated".equals(eventType)) {
                 BranchPayload payload = (BranchPayload) event.getPayload();
                 branchService.createBranch(payload);
-                log.info("✅ partCreated saved: {}", payload.getBranchName());
+                log.info("✅ branchCreated saved: {}", payload.getBranchName());
             }
             else if ("DistanceCalculated".equals(eventType)) {
                 DistancePayload payload = (DistancePayload) event.getPayload();

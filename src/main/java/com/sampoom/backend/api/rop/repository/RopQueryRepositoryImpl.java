@@ -2,12 +2,16 @@ package com.sampoom.backend.api.rop.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sampoom.backend.api.bom.entity.BomComplexity;
+import com.sampoom.backend.api.bom.entity.QBom;
 import com.sampoom.backend.api.inventory.entity.QInventory;
 import com.sampoom.backend.api.part.entity.QPart;
 import com.sampoom.backend.api.rop.dto.RopFilterDto;
 import com.sampoom.backend.api.rop.dto.RopResDto;
 import com.sampoom.backend.api.rop.entity.QRop;
 import com.sampoom.backend.api.rop.dto.QRopResDto;
+import com.sampoom.backend.api.rop.entity.Rop;
+import com.sampoom.backend.common.entity.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,6 +28,7 @@ public class RopQueryRepositoryImpl implements RopQueryRepository {
     QRop rop = QRop.rop1;
     QInventory inventory = QInventory.inventory;
     QPart part = QPart.part;
+    QBom bom = QBom.bom;
 
     @Override
     public Page<RopResDto> search(RopFilterDto req, Pageable pageable) {
@@ -82,5 +87,22 @@ public class RopQueryRepositoryImpl implements RopQueryRepository {
                 ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public List<Rop> findActiveRopExcludingComplexParts(Status status, Long branchId, List<Long> partIds) {
+        return queryFactory
+                .selectFrom(rop)
+                .join(rop.inventory, inventory).fetchJoin()
+                .join(inventory.part, part).fetchJoin()
+                .leftJoin(bom).on(bom.partId.eq(part.id))
+                .where(
+                        rop.autoOrderStatus.eq(status),
+                        inventory.branch.id.eq(branchId),
+                        part.id.in(partIds),
+                        bom.complexity.isNull()
+                                .or(bom.complexity.ne(BomComplexity.COMPLEX))
+                )
+                .fetch();
     }
 }
