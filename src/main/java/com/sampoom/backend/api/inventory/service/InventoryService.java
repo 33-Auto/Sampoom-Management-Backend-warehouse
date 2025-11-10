@@ -231,6 +231,7 @@ public class InventoryService {
 
             if (inventory.getQuantity() <= rop.getRop()) {
                 int orderQuantity = inventory.getMaxStock() - inventory.getQuantity();
+                orderQuantity -= orderQuantity % inventory.getPart().getStandardQuantity();
                 orderMap.put(inventory, orderQuantity);
             }
         }
