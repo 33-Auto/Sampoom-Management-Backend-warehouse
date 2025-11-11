@@ -61,7 +61,7 @@ public class Inventory extends BaseTimeEntity {
         else if (this.quantity >= this.part.getSafetyStock() &&
                 this.quantity < this.part.getSafetyStock() * 1.5)
             this.quantityStatus = QuantityStatus.SHORT;
-        else if (this.quantity <= this.part.getSafetyStock())
+        else if (this.quantity < this.part.getSafetyStock())
             this.quantityStatus = QuantityStatus.DANGER;
     }
 }
