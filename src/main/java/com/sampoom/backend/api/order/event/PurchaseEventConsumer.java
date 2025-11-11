@@ -3,6 +3,7 @@ package com.sampoom.backend.api.order.event;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.event.service.EventService;
+import com.sampoom.backend.api.inventory.service.InventoryService;
 import com.sampoom.backend.api.order.dto.POEventPayload;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.api.event.entity.Event;
@@ -18,6 +19,7 @@ public class PurchaseEventConsumer {
     private final ObjectMapper objectMapper;
     private final PurchaseOrderService purchaseOrderService;
     private final EventService eventService;
+    private final InventoryService inventoryService;
 
     @KafkaListener(topics = "part-order-events")
     public void consumer(String message) {
@@ -46,6 +48,11 @@ public class PurchaseEventConsumer {
                 case "PartOrderCompleted" -> {
                     purchaseOrderService.completePOStatus(payload);
                     log.info("✅ PartOrderCompleted saved: {}", payload.getPartOrderId());
+                }
+                case "MpsStatusChanged" -> {
+                }
+                case "MpsCompleted" -> {
+                    inventoryService.inboundFromMps(payload);
                 }
             }
         } catch (Exception e) {
