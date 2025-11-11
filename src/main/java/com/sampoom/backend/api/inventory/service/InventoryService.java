@@ -9,9 +9,11 @@ import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.POEventPayload;
 import com.sampoom.backend.api.order.dto.POItemDto;
+import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.POStatus;
 import com.sampoom.backend.api.order.entity.PurchaseOrder;
 import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
+import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.api.order.service.PurchaseOrderService;
 import com.sampoom.backend.api.event.entity.Event;
 import com.sampoom.backend.api.part.entity.Category;
@@ -52,6 +54,7 @@ public class InventoryService {
     private final BranchRepository branchRepository;
     private final PurchaseOrderService purchaseOrderService;
     private final PurchaseOrderRepository purchaseOrderRepository;
+    private final OrderService orderService;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -89,7 +92,7 @@ public class InventoryService {
         this.updateParts(partUpdateReqDto, inventoryMap);
         this.saveOutHistory(deliveryReqDto.getItems(), inventoryMap);
         this.checkRop(deliveryReqDto);
-        //orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.CONFIRMED);
+        orderService.setOrderStatusEvent(deliveryReqDto.getOrderId(), OrderStatus.ARRIVED);
     }
 
     private void validateOutBound(PartUpdateReqDto partUpdateReqDto) {
