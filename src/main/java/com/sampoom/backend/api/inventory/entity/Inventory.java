@@ -6,6 +6,7 @@ import com.sampoom.backend.api.part.entity.QuantityStatus;
 import com.sampoom.backend.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Table(name = "inventory")
@@ -14,6 +15,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Slf4j
 public class Inventory extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,14 +56,20 @@ public class Inventory extends BaseTimeEntity {
     }
 
     public void updateQuantityStatus() {
-        if (this.quantity >= this.maxStock * 0.8)
+        Integer safetyStock = this.part.getSafetyStock();
+        if (safetyStock == null) {
+            log.error("Part safety stock is null. quantityStatus cannot changed: warehouseID={} partId={}", this.id, this.part.getId());
+            return;
+        }
+
+        if (this.quantity >= (int)(this.maxStock * 0.8))
             this.quantityStatus = QuantityStatus.OVER;
-        else if (this.quantity >= this.part.getSafetyStock() * 1.5)
+        else if (this.quantity >= (int)(safetyStock * 1.5))
             this.quantityStatus = QuantityStatus.ENOUGH;
-        else if (this.quantity >= this.part.getSafetyStock() &&
-                this.quantity < this.part.getSafetyStock() * 1.5)
+        else if (this.quantity >= safetyStock &&
+                this.quantity < (int)(safetyStock * 1.5))
             this.quantityStatus = QuantityStatus.SHORT;
-        else if (this.quantity < this.part.getSafetyStock())
+        else if (this.quantity < safetyStock)
             this.quantityStatus = QuantityStatus.DANGER;
     }
 }
