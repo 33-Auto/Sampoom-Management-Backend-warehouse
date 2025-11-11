@@ -338,6 +338,10 @@ public class InventoryService {
 
         for (Inventory inventory : inventories) {
             if (partIdDeltaMap.get(inventory.getPart().getId()) == null) continue;
+            if (partIdDeltaMap.get(inventory.getPart().getId()) < 0) {
+                log.error("inboundFromMps: negative delta");
+                continue;
+            }
             inventory.updateStock(partIdDeltaMap.get(inventory.getPart().getId()));
             log.info("inboundFromMps: {} {}", inventory.getPart().getId(), inventory.getQuantity());
         }
