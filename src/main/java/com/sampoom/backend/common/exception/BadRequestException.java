@@ -1,5 +1,6 @@
 package com.sampoom.backend.common.exception;
 
+import com.sampoom.backend.common.response.ErrorStatus;
 import org.springframework.http.HttpStatus;
 
 public class BadRequestException extends BaseException {
@@ -11,4 +12,7 @@ public class BadRequestException extends BaseException {
     super(HttpStatus.BAD_REQUEST, message);
   }
 
+  public BadRequestException(ErrorStatus errorStatus) {
+      super(errorStatus.getHttpStatus(), errorStatus.getMessage(), errorStatus.getCode());
+  }
 }
