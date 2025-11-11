@@ -47,4 +47,21 @@ public class Inventory extends BaseTimeEntity {
 
     @Column(name = "max_stock", nullable = false)
     private Integer maxStock;
+
+    public void updateStock(Integer dq) {
+        this.quantity += dq;
+        this.updateQuantityStatus();
+    }
+
+    public void updateQuantityStatus() {
+        if (this.quantity >= this.maxStock * 0.8)
+            this.quantityStatus = QuantityStatus.OVER;
+        else if (this.quantity >= this.part.getSafetyStock() * 1.5)
+            this.quantityStatus = QuantityStatus.ENOUGH;
+        else if (this.quantity >= this.part.getSafetyStock() &&
+                this.quantity < this.part.getSafetyStock() * 1.5)
+            this.quantityStatus = QuantityStatus.SHORT;
+        else if (this.quantity <= this.part.getSafetyStock())
+            this.quantityStatus = QuantityStatus.DANGER;
+    }
 }

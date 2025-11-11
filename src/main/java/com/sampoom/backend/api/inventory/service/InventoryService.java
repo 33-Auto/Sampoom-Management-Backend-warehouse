@@ -7,6 +7,8 @@ import com.sampoom.backend.api.inventory.entity.Inventory;
 import com.sampoom.backend.api.inventory.repository.InventoryRepository;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
+import com.sampoom.backend.api.order.dto.POEventPayload;
+import com.sampoom.backend.api.order.dto.POItemDto;
 import com.sampoom.backend.api.order.entity.POStatus;
 import com.sampoom.backend.api.order.entity.PurchaseOrder;
 import com.sampoom.backend.api.order.repository.PurchaseOrderRepository;
@@ -27,6 +29,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final CategoryRepository categoryRepository;
@@ -134,37 +138,14 @@ public class InventoryService {
         if (!branchRepository.existsById(partUpdateReqDto.getWarehouseId()))
             throw new NotFoundException(ErrorStatus.BRANCH_NOT_FOUND.getMessage());
 
-        // 현재 수량 조회 & 미만 예외 확인
         for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
             Inventory inventory = inventoryMap.get(dto.getId());
 
             if (inventory.getQuantity() + dto.getDelta() < 0) {
                 throw new BadRequestException(ErrorStatus.INVALID_PART_QUANTITY.getMessage() + " partId: " + dto.getId());
             }
+            inventory.updateStock(dto.getDelta());
         }
-
-        StringBuilder values = new StringBuilder();
-        Map<String, Object> params = new HashMap<>();
-        int idx = 0;
-        for (PartDeltaDto dto : partUpdateReqDto.getItems()) {
-            if (idx > 0) values.append(", ");
-            String pid = "pid" + idx;
-            String delta = "delta" + idx;
-            values.append("(:").append(pid).append(", :").append(delta).append(")");
-            params.put(pid, dto.getId());
-            params.put(delta, dto.getDelta());
-            idx++;
-        }
-
-        String sql = "UPDATE inventory i SET quantity = i.quantity + t.delta " +
-                "FROM (VALUES " + values + ") AS t(part_id, delta) " +
-                "WHERE i.part_id = t.part_id AND i.branch_id = :branchId";
-
-        Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("branchId", partUpdateReqDto.getWarehouseId());
-        params.forEach(query::setParameter);
-
-        query.executeUpdate();
     }
 
     @Transactional
@@ -340,5 +321,25 @@ public class InventoryService {
             eventService.setEventOutBox("part-forecast-events", eventService.serializePayload(event));
         } else
             throw new BadRequestException(ErrorStatus.INVALID_PAYLOAD_TYPE.getMessage());
+    }
+
+    @Transactional
+    public void inboundFromMps(POEventPayload payload) {
+        List<Long> partIds = payload.getItems().stream().map(POItemDto::getPartId).toList();
+        List<Inventory> inventories = inventoryRepository.findByBranch_IdAndPart_IdIn(payload.getWarehouseId(), partIds);
+        if (inventories.isEmpty()) {
+            log.error("inboundFromMps: {}", ErrorStatus.INVENTORY_NOT_FOUND.getMessage());
+            return;
+        }
+
+        Map<Long, Integer> partIdDeltaMap = payload.getItems()
+                .stream()
+                .collect(Collectors.toMap(POItemDto::getPartId, POItemDto::getQuantity));
+
+        for (Inventory inventory : inventories) {
+            if (partIdDeltaMap.get(inventory.getPart().getId()) == null) continue;
+            inventory.updateStock(partIdDeltaMap.get(inventory.getPart().getId()));
+            log.info("inboundFromMps: {} {}", inventory.getPart().getId(), inventory.getQuantity());
+        }
     }
 }

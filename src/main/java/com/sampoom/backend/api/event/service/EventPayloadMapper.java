@@ -31,6 +31,9 @@ public class EventPayloadMapper {
         registry.put("PartOrderStatusChanged", POEventPayload.class);
         registry.put("PartOrderCompleted", POEventPayload.class);
 
+        registry.put("MpsStatusChanged", POEventPayload.class);
+        registry.put("MpsCompleted", POEventPayload.class);
+
         registry.put("PartForecast", ForecastPayload.class);
 
         registry.put("BomCreated", BomPayload.class);
