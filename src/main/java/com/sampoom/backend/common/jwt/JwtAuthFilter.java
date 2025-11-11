@@ -90,8 +90,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String userId = claims.getSubject();
             String roleStr = claims.get("role", String.class);
             String workspaceStr = claims.get("workspace", String.class);
-            log.info("claims: {}", claims);
-            log.info("userId = {}, role = {}, workspace = {}", userId, roleStr, workspaceStr);
+
             if (userId == null
                     || userId.isBlank()
                     || roleStr == null
