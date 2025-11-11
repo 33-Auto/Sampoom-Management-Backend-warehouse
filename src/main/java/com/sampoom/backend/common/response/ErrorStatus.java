@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorStatus {
 
     // 400 BAD_REQUEST
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.", 50400),
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.", 400),
     MISSING_EMAIL_VERIFICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 인증을 진행해주세요.", 50401),
     ALREADY_REGISTER_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 가입된 이메일 입니다.", 50402),
     ALREADY_EXIST_BRANCH_NAME(HttpStatus.BAD_REQUEST, "이미 존재하는 지점명입니다", 50100),
@@ -44,7 +44,7 @@ public enum ErrorStatus {
     INVALID_WORKSPACE_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 조직(workspace) 타입입니다.", 12408),
 
     // 401 UNAUTHORIZED
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다.", 10000),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다.", 401),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.", 12410),
     NOT_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED,"토큰의 타입이 액세스 토큰이 아닙니다.",12413),
     NOT_SERVICE_TOKEN(HttpStatus.UNAUTHORIZED,"토큰의 타입이 서비스 토큰(내부 통신용 토큰)이 아닙니다.",12414),
@@ -60,7 +60,7 @@ public enum ErrorStatus {
     PART_NOT_FOUND(HttpStatus.NOT_FOUND, "창고에 존재하지 않는 부품입니다.", 50206),
     BRANCH_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 창고 지점입니다.", 50102),
     ROP_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 ROP Id입니다", 50601),
-    INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 창고, 부품으로 등록된 재고가 없습니다", 50402),
+    INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 창고, 부품으로 등록된 재고가 없습니다", 50403),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리가 존재하지 않습니다.", 50210),
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹이 존재하지 않습니다.", 50220),
     PO_NOT_FOUND(HttpStatus.NOT_FOUND, "발주 주문서를 찾을 수 없습니다.", 50310),
