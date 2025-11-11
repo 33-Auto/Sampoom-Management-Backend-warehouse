@@ -292,7 +292,7 @@ public class InventoryService {
     @Transactional(readOnly = true)
     public List<PartItemDto> getInventoryBrief(Long warehouseId, List<Long> partIds) {
         if (!branchRepository.existsById(warehouseId))
-            throw new NotFoundException(ErrorStatus.WAREHOUSE_NOT_FOUND.getMessage());
+            throw new NotFoundException(ErrorStatus.BRANCH_NOT_FOUND.getMessage());
 
         List<Long> existingPartIds = inventoryRepository.findPartIdsByBranch_Id(warehouseId, partIds);
         if (existingPartIds.size() != partIds.size()) {
