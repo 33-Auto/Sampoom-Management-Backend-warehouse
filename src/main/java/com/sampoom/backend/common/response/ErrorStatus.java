@@ -52,7 +52,7 @@ public enum ErrorStatus {
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다.", 12411),
 
     // 403 FORBIDDEN
-    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.", 11403),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.", 403),
     ACCESS_DENIED(HttpStatus.FORBIDDEN,"접근 권한이 없어 접근이 거부되었습니다.",11430),
 
     // 404 NOT_FOUND
