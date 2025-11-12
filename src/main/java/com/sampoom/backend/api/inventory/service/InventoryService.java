@@ -160,7 +160,10 @@ public class InventoryService {
 
         purchaseOrder.setInboundQuantity(totalInboundQuantity);
         purchaseOrder.setReceivedDate(LocalDateTime.now());
-        purchaseOrder.setStatus(POStatus.IN_PROGRESS);
+        if (totalInboundQuantity.equals(purchaseOrder.getQuantity()))
+            purchaseOrder.setStatus(POStatus.COMPLETED);
+        else
+            purchaseOrder.setStatus(POStatus.IN_PROGRESS);
         purchaseOrderRepository.save(purchaseOrder);
     }
 
