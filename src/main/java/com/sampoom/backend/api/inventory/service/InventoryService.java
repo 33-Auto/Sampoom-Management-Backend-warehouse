@@ -160,6 +160,7 @@ public class InventoryService {
 
         purchaseOrder.setInboundQuantity(totalInboundQuantity);
         purchaseOrder.setReceivedDate(LocalDateTime.now());
+        purchaseOrder.setStatus(POStatus.IN_PROGRESS);
         purchaseOrderRepository.save(purchaseOrder);
     }
 
